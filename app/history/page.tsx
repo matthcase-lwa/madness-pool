@@ -182,7 +182,7 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture">
-      <nav className="border-b border-white/8 px-6 py-4">
+      <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
             🏀 MADNESS POOL
@@ -270,7 +270,7 @@ export default function HistoryPage() {
                 placeholder="Search player..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-white/8 border border-white/15 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20"
+                className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20"
               />
               <div className="flex gap-2">
                 {[
@@ -375,7 +375,7 @@ export default function HistoryPage() {
                     <h3 className="font-display text-lg text-court-400 tracking-wider mb-3">YEAR BY YEAR</h3>
                     <div className="space-y-2">
                       {selected.yearlyScores.sort((a, b) => b.year - a.year).map(y => (
-                        <div key={y.year} className="flex items-center justify-between py-2 px-3 bg-white/4 rounded-lg">
+                        <div key={y.year} className="flex items-center justify-between py-2 px-3 bg-white/5 rounded-lg">
                           <span className="font-body font-bold text-chalk">{y.year}</span>
                           <div className="flex items-center gap-4">
                             <span className="text-white/50 text-sm font-body">#{y.rank}</span>
@@ -396,7 +396,7 @@ export default function HistoryPage() {
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 8)
                           .map(([team, count]) => (
-                            <span key={team} className={`px-3 py-1 rounded-full text-sm font-body ${count >= 3 ? 'bg-court-500/30 text-court-300 border border-court-500/40' : 'bg-white/8 text-white/50'}`}>
+                            <span key={team} className={`px-3 py-1 rounded-full text-sm font-body ${count >= 3 ? 'bg-court-500/30 text-court-300 border border-court-500/40' : 'bg-white/10 text-white/50'}`}>
                               {team} {count > 1 ? `×${count}` : ''}
                             </span>
                           ))}

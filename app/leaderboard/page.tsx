@@ -106,7 +106,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture">
-      <nav className="border-b border-white/8 px-6 py-4">
+      <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
             🏀 MADNESS POOL
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
               placeholder="Search player..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-white/8 border border-white/15 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-48"
+              className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-48"
             />
             <button
               onClick={loadScores}
@@ -201,7 +201,7 @@ export default function LeaderboardPage() {
                   {/* Main row */}
                   <button
                     onClick={() => toggleExpand(participant.participant_id)}
-                    className="w-full flex items-center gap-4 p-4 text-left hover:bg-white/4 transition-colors"
+                    className="w-full flex items-center gap-4 p-4 text-left hover:bg-white/5 transition-colors"
                   >
                     {/* Rank */}
                     <div className={`font-display text-3xl tracking-wider w-12 shrink-0 ${medalColors[participant.rank] || 'text-white/30'}`}>
@@ -250,7 +250,7 @@ export default function LeaderboardPage() {
 
                   {/* Expanded picks */}
                   {isExpanded && (
-                    <div className="border-t border-white/8 px-4 py-4 bg-black/20">
+                    <div className="border-t border-white/10 px-4 py-4 bg-black/20">
                       {participantPicks.length === 0 ? (
                         <div className="text-white/30 text-sm font-body text-center py-2">Loading picks...</div>
                       ) : (
@@ -264,7 +264,7 @@ export default function LeaderboardPage() {
                                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-body border ${
                                   alive
                                     ? 'bg-emerald-500/10 border-emerald-500/20 text-chalk'
-                                    : 'bg-white/4 border-white/8 text-white/30 line-through'
+                                    : 'bg-white/5 border-white/10 text-white/30 line-through'
                                 }`}
                               >
                                 <span className={`seed-badge ${team.seed === 1 ? 'seed-1' : team.seed <= 4 ? 'seed-2' : team.seed >= 9 ? 'seed-9plus' : 'seed-5plus'}`}>

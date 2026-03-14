@@ -43,7 +43,7 @@ export default function Home() {
       </div>
 
       {/* Nav */}
-      <nav className="relative z-10 border-b border-white/8 px-6 py-4">
+      <nav className="relative z-10 border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-display text-2xl text-court-500 tracking-wider">🏀</span>
@@ -128,7 +128,7 @@ export default function Home() {
             <h2 className="font-display text-3xl text-court-400 tracking-wider mb-5">PRIZE BREAKDOWN</h2>
             <div className="space-y-2">
               {prizes.places.map((p, i) => (
-                <div key={p.place} className={`flex items-center justify-between py-2.5 px-3 rounded-lg ${i === 0 ? 'bg-court-500/20 border border-court-500/30' : 'bg-white/4'}`}>
+                <div key={p.place} className={`flex items-center justify-between py-2.5 px-3 rounded-lg ${i === 0 ? 'bg-court-500/20 border border-court-500/30' : 'bg-white/5'}`}>
                   <div className="flex items-center gap-3">
                     <span className={`font-display text-xl tracking-wider ${i === 0 ? 'text-court-400' : 'text-white/50'}`}>{p.place}</span>
                     <span className="text-white/40 text-xs font-body">{p.pct}</span>
@@ -156,7 +156,7 @@ export default function Home() {
             </div>
             <div className="space-y-2">
               {topPlayers.map((p, i) => (
-                <div key={p.participant_id} className="flex items-center gap-4 py-3 px-4 bg-white/4 rounded-lg">
+                <div key={p.participant_id} className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg">
                   <span className={`font-display text-2xl tracking-wider w-8 ${i === 0 ? 'text-court-400' : 'text-white/40'}`}>
                     {i === 0 ? '🏆' : `#${i + 1}`}
                   </span>
@@ -173,7 +173,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/8 px-6 py-6 mt-8">
+      <footer className="relative z-10 border-t border-white/10 px-6 py-6 mt-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-white/30 text-xs font-body">
           <span>© {YEAR} March Madness Pool</span>
           <Link href="/admin" className="hover:text-white/50 transition-colors">Admin</Link>

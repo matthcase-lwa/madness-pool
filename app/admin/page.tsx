@@ -136,7 +136,7 @@ export default function AdminPage() {
     loadData()
   }
 
-  const inputClass = "bg-white/8 border border-white/15 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-full"
+  const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-full"
 
   if (!authed) {
     return (
@@ -161,7 +161,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture">
-      <nav className="border-b border-white/8 px-6 py-4">
+      <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 MADNESS POOL</Link>
@@ -235,7 +235,7 @@ export default function AdminPage() {
             </div>
 
             <div className="card overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/8 flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
                 <h2 className="font-display text-2xl text-court-400 tracking-wider">TEAMS ({teams.length})</h2>
               </div>
               <div className="divide-y divide-white/5">
@@ -248,7 +248,7 @@ export default function AdminPage() {
                       <span className="text-red-400 text-xs font-body">Out R{team.eliminated_round}</span>
                     ) : (
                       <select
-                        className="bg-white/8 border border-white/15 rounded px-2 py-1 text-white/50 text-xs font-body"
+                        className="bg-white/10 border border-white/10 rounded px-2 py-1 text-white/50 text-xs font-body"
                         onChange={e => e.target.value && eliminateTeam(team.id, parseInt(e.target.value))}
                         defaultValue=""
                       >
@@ -338,7 +338,7 @@ export default function AdminPage() {
             {/* Recent games */}
             {games.length > 0 && (
               <div className="card overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/8">
+                <div className="px-6 py-4 border-b border-white/10">
                   <h3 className="font-display text-xl text-court-400 tracking-wider">RECORDED GAMES</h3>
                 </div>
                 <div className="divide-y divide-white/5">

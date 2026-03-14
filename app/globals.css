@@ -60,7 +60,7 @@
   }
 
   .card-hover {
-    @apply card transition-all duration-200 hover:bg-white/8 hover:border-court-500/30 hover:shadow-lg hover:shadow-court-500/10;
+    @apply card transition-all duration-200 hover:bg-white/10 hover:border-court-500/30 hover:shadow-lg hover:shadow-court-500/10;
   }
 
   /* Rank badge */

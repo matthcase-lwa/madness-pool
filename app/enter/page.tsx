@@ -144,7 +144,7 @@ export default function EnterPage() {
   return (
     <div className="min-h-screen bg-hardwood court-texture">
       {/* Nav */}
-      <nav className="border-b border-white/8 px-6 py-4">
+      <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
             🏀 MADNESS POOL
@@ -218,7 +218,7 @@ export default function EnterPage() {
                                 ${isSelected
                                   ? 'bg-court-500/20 border-court-500 text-chalk'
                                   : canSelect
-                                    ? 'bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:border-white/20'
+                                    ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
                                     : 'bg-white/2 border-white/5 text-white/20 cursor-not-allowed'
                                 }`}
                             >
@@ -248,7 +248,7 @@ export default function EnterPage() {
                           ${isSelected
                             ? 'bg-court-500/20 border-court-500 text-chalk'
                             : canSelect
-                              ? 'bg-white/4 border-white/10 text-white/70 hover:bg-white/8 hover:border-white/20'
+                              ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
                               : 'bg-white/2 border-white/5 text-white/20 cursor-not-allowed'
                           }`}
                       >
@@ -353,7 +353,7 @@ export default function EnterPage() {
                   value={form.nickname}
                   onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
                   placeholder="e.g. JCohen2"
-                  className="w-full bg-white/8 border border-white/15 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -364,7 +364,7 @@ export default function EnterPage() {
                   value={form.fullName}
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
                   placeholder="First Last"
-                  className="w-full bg-white/8 border border-white/15 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -375,7 +375,7 @@ export default function EnterPage() {
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                   placeholder="you@example.com"
-                  className="w-full bg-white/8 border border-white/15 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -389,7 +389,7 @@ export default function EnterPage() {
                   value={form.tiebreaker}
                   onChange={e => setForm(f => ({ ...f, tiebreaker: e.target.value }))}
                   placeholder="e.g. 145"
-                  className="w-full bg-white/8 border border-white/15 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
