@@ -1,6 +1,422 @@
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
+'use client'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import { validateSelections } from '@/lib/scoring'
+
+const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
+
+interface Team {
+  id: string
+  name: string
+  seed: number
+  region: string
+  is_playin_pair: boolean
+  playin_partner: string | null
+}
+
+function SeedBadge({ seed }: { seed: number }) {
+  const cls = seed === 1 ? 'seed-1' : seed <= 4 ? 'seed-2' : seed >= 9 ? 'seed-9plus' : 'seed-5plus'
+  return <span className={`seed-badge ${cls}`}>#{seed}</span>
+}
+
+export default function EnterPage() {
+  const [teams, setTeams] = useState<Team[]>([])
+  const [selected, setSelected] = useState<string[]>([])
+  const [form, setForm] = useState({ nickname: '', fullName: '', email: '', tiebreaker: '' })
+  const [step, setStep] = useState<'picks' | 'info' | 'done'>('picks')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [filter, setFilter] = useState<'all' | '1' | '2-4' | '5+'>('all')
+
+  useEffect(() => {
+    supabase.from('teams').select('*').eq('year', YEAR).order('seed').then(({ data }) => {
+      if (data) setTeams(data)
+    })
+  }, [])
+
+  const selectedTeams = teams.filter(t => selected.includes(t.id))
+
+  const validationResult = validateSelections(
+    selectedTeams.map(t => ({ teamId: t.id, seed: t.seed }))
+  )
+
+  function toggleTeam(teamId: string) {
+    setSelected(prev => {
+      if (prev.includes(teamId)) return prev.filter(id => id !== teamId)
+      if (prev.length >= 8) return prev
+      return [...prev, teamId]
+    })
+  }
+
+  const filteredTeams = teams.filter(t => {
+    if (filter === '1') return t.seed === 1
+    if (filter === '2-4') return t.seed >= 2 && t.seed <= 4
+    if (filter === '5+') return t.seed >= 5
+    return true
+  })
+
+  // Group by region
+  const regions = ['East', 'West', 'South', 'Midwest']
+  const byRegion = regions.map(region => ({
+    region,
+    teams: filteredTeams.filter(t => t.region === region),
+  })).filter(g => g.teams.length > 0)
+
+  // If no regions assigned, just show flat list
+  const hasRegions = teams.some(t => t.region)
+
+  async function handleSubmit() {
+    setLoading(true)
+    setError('')
+
+    try {
+      // Create participant
+      const { data: participant, error: pErr } = await supabase
+        .from('participants')
+        .insert({
+          year: YEAR,
+          nickname: form.nickname.trim(),
+          full_name: form.fullName.trim(),
+          email: form.email.trim(),
+          tiebreaker: form.tiebreaker ? parseInt(form.tiebreaker) : null,
+        })
+        .select()
+        .single()
+
+      if (pErr) throw new Error(pErr.message)
+
+      // Insert picks
+      const picks = selected.map(teamId => ({
+        participant_id: participant.id,
+        team_id: teamId,
+        year: YEAR,
+      }))
+
+      const { error: pickErr } = await supabase.from('picks').insert(picks)
+      if (pickErr) throw new Error(pickErr.message)
+
+      setStep('done')
+    } catch (e: any) {
+      setError(e.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (step === 'done') {
+    return (
+      <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
+          <div className="text-8xl mb-6">🏀</div>
+          <h1 className="font-display text-6xl text-court-400 tracking-wider mb-4">YOU'RE IN!</h1>
+          <p className="text-white/60 mb-2 font-body">
+            <strong className="text-chalk">{form.nickname}</strong>'s picks have been submitted.
+          </p>
+          <p className="text-white/40 text-sm mb-8 font-body">
+            Don't forget to send $40 via Venmo or Zelle to matthcase@gmail.com
+          </p>
+          <div className="card p-5 mb-8 text-left">
+            <h3 className="font-display text-xl text-court-400 tracking-wider mb-3">YOUR PICKS</h3>
+            <div className="space-y-2">
+              {selectedTeams.map(t => (
+                <div key={t.id} className="flex items-center justify-between">
+                  <span className="font-body text-chalk">{t.is_playin_pair ? `${t.name}/${t.playin_partner}` : t.name}</span>
+                  <SeedBadge seed={t.seed} />
+                </div>
+              ))}
+            </div>
+            {form.tiebreaker && (
+              <div className="mt-3 pt-3 border-t border-white/10 text-white/50 text-sm font-body">
+                Tiebreaker: {form.tiebreaker} total points
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Link href="/leaderboard" className="btn-primary">View Leaderboard</Link>
+            <Link href="/" className="btn-secondary">Home</Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-hardwood court-texture">
+      {/* Nav */}
+      <nav className="border-b border-white/10 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link href="/" className="font-display text-xl tracking-widest text-chalk">
+            🏀 MADNESS POOL
+          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/history" className="nav-link">History</Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="mb-8">
+          <h1 className="font-display text-6xl text-chalk tracking-wider mb-2">SUBMIT YOUR PICKS</h1>
+          <p className="text-white/50 font-body">Select 8 teams following the seed rules below.</p>
+        </div>
+
+        {/* Steps */}
+        <div className="flex gap-2 mb-8">
+          {['picks', 'info'].map((s, i) => (
+            <div key={s} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-body ${step === s ? 'bg-court-500 text-white' : 'bg-white/10 text-white/40'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step === s ? 'bg-white text-court-500' : 'bg-white/20'}`}>{i + 1}</span>
+              {s === 'picks' ? 'Select Teams' : 'Your Info'}
+            </div>
+          ))}
+        </div>
+
+        {step === 'picks' && (
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Team selector */}
+            <div className="lg:col-span-2">
+              {/* Seed filter */}
+              <div className="flex gap-2 mb-5 flex-wrap">
+                {[
+                  { key: 'all', label: 'All Teams' },
+                  { key: '1', label: '#1 Seeds' },
+                  { key: '2-4', label: '#2–4 Seeds' },
+                  { key: '5+', label: '#5+ Seeds' },
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setFilter(f.key as any)}
+                    className={`px-4 py-1.5 rounded-full text-sm font-body transition-all ${filter === f.key ? 'bg-court-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {teams.length === 0 ? (
+                <div className="card p-12 text-center">
+                  <div className="text-white/30 text-4xl mb-3">⏳</div>
+                  <p className="text-white/40 font-body">Teams haven't been loaded yet.</p>
+                  <p className="text-white/30 text-sm font-body mt-1">Check back once the tournament bracket is set.</p>
+                </div>
+              ) : hasRegions ? (
+                <div className="space-y-6">
+                  {byRegion.map(({ region, teams: rTeams }) => (
+                    <div key={region}>
+                      <h3 className="font-display text-xl text-court-500/70 tracking-widest mb-3">{region.toUpperCase()}</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {rTeams.map(team => {
+                          const isSelected = selected.includes(team.id)
+                          const canSelect = selected.length < 8 || isSelected
+                          return (
+                            <button
+                              key={team.id}
+                              onClick={() => canSelect && toggleTeam(team.id)}
+                              disabled={!canSelect}
+                              className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all duration-150 font-body
+                                ${isSelected
+                                  ? 'bg-court-500/20 border-court-500 text-chalk'
+                                  : canSelect
+                                    ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
+                                    : 'bg-white/2 border-white/5 text-white/20 cursor-not-allowed'
+                                }`}
+                            >
+                              <SeedBadge seed={team.seed} />
+                              <span className="font-medium text-sm flex-1">
+                                {team.is_playin_pair ? `${team.name}/${team.playin_partner}` : team.name}
+                              </span>
+                              {isSelected && <span className="text-court-400 text-xs">✓</span>}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredTeams.map(team => {
+                    const isSelected = selected.includes(team.id)
+                    const canSelect = selected.length < 8 || isSelected
+                    return (
+                      <button
+                        key={team.id}
+                        onClick={() => canSelect && toggleTeam(team.id)}
+                        disabled={!canSelect}
+                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all duration-150 font-body
+                          ${isSelected
+                            ? 'bg-court-500/20 border-court-500 text-chalk'
+                            : canSelect
+                              ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
+                              : 'bg-white/2 border-white/5 text-white/20 cursor-not-allowed'
+                          }`}
+                      >
+                        <SeedBadge seed={team.seed} />
+                        <span className="font-medium text-sm flex-1">
+                          {team.is_playin_pair ? `${team.name}/${team.playin_partner}` : team.name}
+                        </span>
+                        {isSelected && <span className="text-court-400 text-xs">✓</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Selection summary */}
+            <div className="space-y-4">
+              <div className="card p-5 sticky top-6">
+                <h3 className="font-display text-2xl text-court-400 tracking-wider mb-4">
+                  YOUR PICKS ({selected.length}/8)
+                </h3>
+
+                {/* Requirements checklist */}
+                <div className="space-y-2 mb-5">
+                  {[
+                    { label: '#1 Seed', check: selectedTeams.filter(t => t.seed === 1).length === 1, count: `${selectedTeams.filter(t => t.seed === 1).length}/1` },
+                    { label: '#2–4 Seeds', check: selectedTeams.filter(t => t.seed >= 2 && t.seed <= 4).length === 3, count: `${selectedTeams.filter(t => t.seed >= 2 && t.seed <= 4).length}/3` },
+                    { label: '#5+ Seeds', check: selectedTeams.filter(t => t.seed >= 5).length === 4, count: `${selectedTeams.filter(t => t.seed >= 5).length}/4` },
+                  ].map(req => (
+                    <div key={req.label} className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-body ${req.check ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/5 text-white/40'}`}>
+                      <span>{req.check ? '✓' : '○'} {req.label}</span>
+                      <span className="font-bold">{req.count}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Selected teams list */}
+                <div className="space-y-1.5 mb-5 min-h-[120px]">
+                  {selectedTeams.length === 0 && (
+                    <p className="text-white/20 text-sm font-body italic text-center py-4">No teams selected yet</p>
+                  )}
+                  {selectedTeams.map(t => (
+                    <div key={t.id} className="flex items-center justify-between py-1.5 px-2 bg-white/5 rounded text-sm font-body">
+                      <span className="text-chalk">{t.is_playin_pair ? `${t.name}/${t.playin_partner}` : t.name}</span>
+                      <div className="flex items-center gap-2">
+                        <SeedBadge seed={t.seed} />
+                        <button onClick={() => toggleTeam(t.id)} className="text-white/30 hover:text-red-400 transition-colors text-xs">✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Validation errors */}
+                {selected.length > 0 && !validationResult.valid && (
+                  <div className="mb-4">
+                    {validationResult.errors.map(err => (
+                      <p key={err} className="text-red-400 text-xs font-body mb-1">⚠ {err}</p>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setStep('info')}
+                  disabled={!validationResult.valid}
+                  className={`w-full py-3 rounded-lg font-bold font-body transition-all ${validationResult.valid
+                    ? 'btn-primary'
+                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                  }`}
+                >
+                  Continue →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 'info' && (
+          <div className="max-w-xl">
+            <button onClick={() => setStep('picks')} className="text-white/40 hover:text-white/70 text-sm font-body mb-6 flex items-center gap-2">
+              ← Back to picks
+            </button>
+
+            <div className="card p-6 mb-6">
+              <h3 className="font-display text-2xl text-court-400 tracking-wider mb-1">YOUR PICKS</h3>
+              <div className="grid grid-cols-2 gap-1.5 mt-3">
+                {selectedTeams.map(t => (
+                  <div key={t.id} className="flex items-center gap-2 text-sm font-body">
+                    <SeedBadge seed={t.seed} />
+                    <span className="text-white/70">{t.is_playin_pair ? `${t.name}/${t.playin_partner}` : t.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card p-6 space-y-5">
+              <h3 className="font-display text-2xl text-court-400 tracking-wider">YOUR DETAILS</h3>
+
+              <div>
+                <label className="text-white/50 text-sm font-body block mb-2">Nickname / Display Name *</label>
+                <input
+                  type="text"
+                  value={form.nickname}
+                  onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
+                  placeholder="e.g. JCohen2"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/50 text-sm font-body block mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={form.fullName}
+                  onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
+                  placeholder="First Last"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/50 text-sm font-body block mb-2">Email</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="you@example.com"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/50 text-sm font-body block mb-1">
+                  Tiebreaker: Total points in Championship Game *
+                </label>
+                <p className="text-white/30 text-xs font-body mb-2">Predict the combined score of both teams in the final game</p>
+                <input
+                  type="number"
+                  value={form.tiebreaker}
+                  onChange={e => setForm(f => ({ ...f, tiebreaker: e.target.value }))}
+                  placeholder="e.g. 145"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm font-body">
+                  {error}
+                </div>
+              )}
+
+              <button
+                onClick={handleSubmit}
+                disabled={!form.nickname.trim() || loading}
+                className={`w-full py-4 rounded-lg font-bold font-body text-lg transition-all ${form.nickname.trim()
+                  ? 'btn-primary'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+                }`}
+              >
+                {loading ? 'Submitting...' : 'Submit My Picks 🏀'}
+              </button>
+
+              <p className="text-white/30 text-xs font-body text-center">
+                After submitting, send $40 via Venmo/Zelle to matthcase@gmail.com
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }

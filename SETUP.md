@@ -1,167 +1,118 @@
-# 🏀 March Madness Pool — Setup & Deployment Guide
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-## Overview
-This is a Next.js 14 app with Supabase as the database, deployable to Vercel for free.
+:root {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
 
----
-
-## Step 1: Set Up Supabase (Free)
-
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Click **New Project** — give it a name like "madness-pool"
-3. Choose a region close to you and set a database password
-4. Once created, go to **SQL Editor** in the left sidebar
-5. Paste the entire contents of `supabase-schema.sql` and click **Run**
-6. Go to **Project Settings → API** and copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role secret** → `SUPABASE_SERVICE_ROLE_KEY`
-
----
-
-## Step 2: Deploy to Vercel (Free)
-
-1. Push this project folder to a GitHub repo
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/YOUR_USERNAME/madness-pool.git
-   git push -u origin main
-   ```
-
-2. Go to [vercel.com](https://vercel.com), sign in with GitHub
-3. Click **New Project** → import your repo
-4. Add these **Environment Variables** in Vercel:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL        = (from Supabase)
-   NEXT_PUBLIC_SUPABASE_ANON_KEY   = (from Supabase)
-   SUPABASE_SERVICE_ROLE_KEY       = (from Supabase)
-   ADMIN_PASSWORD                  = (choose something strong)
-   NEXT_PUBLIC_POOL_YEAR           = 2026
-   NEXT_PUBLIC_ENTRY_FEE           = 40
-   ```
-5. Click **Deploy** — it'll be live in ~2 minutes at a `.vercel.app` URL
-
----
-
-## Step 3: Load the 2026 Tournament Teams
-
-Once deployed, go to `yoursite.vercel.app/admin` and log in with your password.
-
-Under **Teams**, add all 68 teams. For each team you need:
-- **Name** (e.g. "Duke")
-- **Seed** (1–16)
-- **Region** (East / West / South / Midwest) — optional but nice for the submission form
-- **Play-in pair** — check this box for play-in teams and enter the partner name
-
-**Tip:** The bracket is typically announced on Selection Sunday (mid-March).
-
----
-
-## Step 4: Share the Submission Link
-
-Send participants to: `yoursite.vercel.app/enter`
-
-They pick their 8 teams, enter their name/email, tiebreaker, and submit.
-You'll see all entries in the Admin → Participants tab, where you can mark payments.
-
----
-
-## Step 5: Enter Game Results During the Tournament
-
-Go to **Admin → Enter Scores** after each game:
-1. Select the round
-2. Select the winner and loser
-3. Enter the final scores
-4. Hit **Save** — scores and leaderboard update instantly for everyone
-
-The leaderboard at `yoursite.vercel.app/leaderboard` auto-refreshes every 60 seconds.
-
----
-
-## Step 6: Import Historical Data (Optional but Fun)
-
-To power the Hall of History page with 10 years of past results:
-
-1. Go to **Admin → Import History**
-2. For each past year, create a JSON array like this:
-
-```json
-[
-  {
-    "year": 2024,
-    "nickname": "JCohen2",
-    "full_name": "Josh Cohen",
-    "total_points": 56,
-    "final_rank": 1,
-    "teams_picked": ["Duke", "MSU", "Texas Tech", "St. John's", "VCU", "Drake", "Arkansas", "McNeese"]
-  },
-  {
-    "year": 2024,
-    "nickname": "RBuganski1",
-    "full_name": "Ryan Buganski",
-    "total_points": 55,
-    "final_rank": 2,
-    "teams_picked": ["Duke", "St. John's", "Alabama", "MSU", "Michigan", "Gonzaga", "Drake", "Colorado St."]
+@layer base {
+  * {
+    box-sizing: border-box;
   }
-]
-```
 
-**Shortcut:** Share your old Excel files with me and I'll convert them to the right JSON format for you — ready to paste and import.
+  html {
+    scroll-behavior: smooth;
+  }
 
----
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1a0f05;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ff7410;
+    border-radius: 3px;
+  }
+}
 
-## Pages Summary
+@layer components {
+  /* Court lines background texture */
+  .court-texture {
+    background-image:
+      linear-gradient(rgba(255, 116, 16, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 116, 16, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
 
-| URL | Purpose |
-|-----|---------|
-| `/` | Homepage with rules, prizes, leaderboard preview |
-| `/enter` | Participant team submission form |
-| `/leaderboard` | Live leaderboard with expandable picks |
-| `/history` | Hall of History with player stats & fun facts |
-| `/admin` | Password-protected admin dashboard |
+  /* Grain overlay */
+  .grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
 
----
+  /* Orange accent line */
+  .accent-line {
+    @apply border-l-4 border-court-500 pl-4;
+  }
 
-## Scoring Logic (for reference)
+  /* Card style */
+  .card {
+    @apply bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm;
+  }
 
-| Event | Points |
-|-------|--------|
-| Win in Round of 64 | 1 |
-| Win in Round of 32 | 2 |
-| Win in Sweet 16 | 3 |
-| Win in Elite 8 | 4 |
-| Win in Final Four | 5 |
-| Win Championship | 6 |
-| Any win by seed #9 or higher | +3 bonus |
-| Win margin 10–19 pts | +1 |
-| Win margin 20–29 pts | +2 |
-| Win margin 30–39 pts | +3 |
-| (and so on...) | |
+  .card-hover {
+    @apply card transition-all duration-200 hover:bg-white/10 hover:border-court-500/30 hover:shadow-lg hover:shadow-court-500/10;
+  }
 
----
+  /* Rank badge */
+  .rank-badge {
+    @apply font-display text-2xl w-10 h-10 flex items-center justify-center rounded-full;
+  }
 
-## Customizing for Future Years
+  /* Seed badge */
+  .seed-badge {
+    @apply text-xs font-bold px-1.5 py-0.5 rounded font-body;
+  }
 
-At the start of each new year:
-1. Update `NEXT_PUBLIC_POOL_YEAR` in Vercel environment variables to the new year
-2. Re-deploy (Vercel does this automatically if you push to main)
-3. Load the new bracket teams in Admin → Teams
-4. That's it — all historical data stays intact
+  .seed-1 { @apply bg-court-500 text-white; }
+  .seed-2, .seed-3, .seed-4 { @apply bg-amber-500/80 text-black; }
+  .seed-5plus { @apply bg-white/20 text-chalk; }
+  .seed-9plus { @apply bg-emerald-500/80 text-white; }
 
----
+  /* Button styles */
+  .btn-primary {
+    @apply bg-court-500 hover:bg-court-400 text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 font-body tracking-wide hover:shadow-lg hover:shadow-court-500/30 active:scale-95;
+  }
 
-## Optional Custom Domain
+  .btn-secondary {
+    @apply bg-white/10 hover:bg-white/20 text-chalk border border-white/20 font-bold px-6 py-3 rounded-lg transition-all duration-200 font-body;
+  }
 
-In Vercel → Project → Settings → Domains, you can add a custom domain (e.g. `matthcasemadness.com`) for ~$10/year from any registrar.
+  /* Score shimmer loading */
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,116,16,0.1) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
 
----
+  /* Nav link */
+  .nav-link {
+    @apply text-white/60 hover:text-court-400 transition-colors duration-200 font-body text-sm tracking-wide;
+  }
 
-## Getting Help
+  .nav-link.active {
+    @apply text-court-400;
+  }
+}
 
-If anything breaks or you want new features, just share the error or request and I can update the code. Key areas for future enhancements:
-- Email notifications after each round
-- Automatic score pulling from a sports API
-- Per-participant shareable stats pages
-- Mobile push notifications
+/* Staggered animation helpers */
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+/* Initially hidden for staggered reveals */
+.stagger-child {
+  opacity: 0;
+  animation: slideUp 0.5s ease-out forwards;
+}
