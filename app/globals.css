@@ -16,15 +16,14 @@
     scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #1a0f05;
+    background: #00172e;
   }
   ::-webkit-scrollbar-thumb {
-    background: #ff7410;
+    background: #FFCB05;
     border-radius: 3px;
   }
 }
@@ -33,8 +32,8 @@
   /* Court lines background texture */
   .court-texture {
     background-image:
-      linear-gradient(rgba(255, 116, 16, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 116, 16, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(255, 203, 5, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 203, 5, 0.04) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
@@ -49,9 +48,9 @@
     opacity: 0.4;
   }
 
-  /* Orange accent line */
+  /* Maize accent line */
   .accent-line {
-    @apply border-l-4 border-court-500 pl-4;
+    @apply border-l-4 border-maize-500 pl-4;
   }
 
   /* Card style */
@@ -60,7 +59,7 @@
   }
 
   .card-hover {
-    @apply card transition-all duration-200 hover:bg-white/10 hover:border-court-500/30 hover:shadow-lg hover:shadow-court-500/10;
+    @apply card transition-all duration-200 hover:bg-white/10 hover:border-maize-500/30 hover:shadow-lg hover:shadow-maize-500/10;
   }
 
   /* Rank badge */
@@ -73,14 +72,14 @@
     @apply text-xs font-bold px-1.5 py-0.5 rounded font-body;
   }
 
-  .seed-1 { @apply bg-court-500 text-white; }
-  .seed-2, .seed-3, .seed-4 { @apply bg-amber-500/80 text-black; }
+  .seed-1 { @apply bg-maize-500 text-blue-500; }
+  .seed-2, .seed-3, .seed-4 { @apply bg-maize-600/80 text-blue-500; }
   .seed-5plus { @apply bg-white/20 text-chalk; }
   .seed-9plus { @apply bg-emerald-500/80 text-white; }
 
   /* Button styles */
   .btn-primary {
-    @apply bg-court-500 hover:bg-court-400 text-white font-bold px-6 py-3 rounded-lg transition-all duration-200 font-body tracking-wide hover:shadow-lg hover:shadow-court-500/30 active:scale-95;
+    @apply bg-maize-500 hover:bg-maize-400 text-blue-500 font-bold px-6 py-3 rounded-lg transition-all duration-200 font-body tracking-wide hover:shadow-lg hover:shadow-maize-500/30 active:scale-95;
   }
 
   .btn-secondary {
@@ -89,18 +88,18 @@
 
   /* Score shimmer loading */
   .shimmer {
-    background: linear-gradient(90deg, transparent 0%, rgba(255,116,16,0.1) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255,203,5,0.08) 50%, transparent 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 
   /* Nav link */
   .nav-link {
-    @apply text-white/60 hover:text-court-400 transition-colors duration-200 font-body text-sm tracking-wide;
+    @apply text-white/60 hover:text-maize-400 transition-colors duration-200 font-body text-sm tracking-wide;
   }
 
   .nav-link.active {
-    @apply text-court-400;
+    @apply text-maize-400;
   }
 }
 

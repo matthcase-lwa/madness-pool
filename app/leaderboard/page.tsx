@@ -109,7 +109,7 @@ export default function LeaderboardPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 MADNESS POOL
+            🏀 BRACKETLESS MADNESS
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/enter" className="nav-link">Enter Pool</Link>
@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
             <h1 className="font-display text-6xl text-chalk tracking-wider">LEADERBOARD</h1>
             <div className="flex items-center gap-4 mt-2">
               {currentRound > 0 && (
-                <span className="text-court-500 text-sm font-body font-bold tracking-wide">
+                <span className="text-maize-500 text-sm font-body font-bold tracking-wide">
                   🟢 After {ROUND_NAMES[currentRound]}
                 </span>
               )}
@@ -142,7 +142,7 @@ export default function LeaderboardPage() {
               placeholder="Search player..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-48"
+              className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-48"
             />
             <button
               onClick={loadScores}
@@ -157,9 +157,9 @@ export default function LeaderboardPage() {
         {scores.length > 0 && (
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8">
             {prizes.places.map((p, i) => (
-              <div key={p.place} className={`card p-3 text-center ${i === 0 ? 'border-court-500/40 bg-court-500/10' : ''}`}>
-                <div className={`font-display text-lg tracking-wider ${i === 0 ? 'text-court-400' : 'text-white/40'}`}>{p.place}</div>
-                <div className={`font-body font-bold text-sm ${i === 0 ? 'text-court-400' : 'text-white/60'}`}>${p.amount.toLocaleString()}</div>
+              <div key={p.place} className={`card p-3 text-center ${i === 0 ? 'border-maize-500/40 bg-maize-500/10' : ''}`}>
+                <div className={`font-display text-lg tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{p.place}</div>
+                <div className={`font-body font-bold text-sm ${i === 0 ? 'text-maize-400' : 'text-white/60'}`}>${p.amount.toLocaleString()}</div>
               </div>
             ))}
           </div>
@@ -195,7 +195,7 @@ export default function LeaderboardPage() {
               return (
                 <div
                   key={participant.participant_id}
-                  className={`card overflow-hidden transition-all duration-300 ${isPrizePosition ? 'border-court-500/25' : ''} ${isLastPlace ? 'border-white/5' : ''}`}
+                  className={`card overflow-hidden transition-all duration-300 ${isPrizePosition ? 'border-maize-500/25' : ''} ${isLastPlace ? 'border-white/5' : ''}`}
                   style={{ animationDelay: `${idx * 30}ms` }}
                 >
                   {/* Main row */}
@@ -225,7 +225,7 @@ export default function LeaderboardPage() {
                     {/* Prize amount */}
                     {isPrizePosition && prizeAmounts[participant.rank] && (
                       <div className="text-right hidden md:block">
-                        <div className="text-court-400 font-bold text-sm font-body">${prizeAmounts[participant.rank].toLocaleString()}</div>
+                        <div className="text-maize-400 font-bold text-sm font-body">${prizeAmounts[participant.rank].toLocaleString()}</div>
                         <div className="text-white/25 text-xs font-body">current prize</div>
                       </div>
                     )}
@@ -238,7 +238,7 @@ export default function LeaderboardPage() {
 
                     {/* Score */}
                     <div className="text-right shrink-0">
-                      <div className={`font-display text-4xl tracking-wider ${participant.rank === 1 ? 'text-court-400' : 'text-chalk'}`}>
+                      <div className={`font-display text-4xl tracking-wider ${participant.rank === 1 ? 'text-maize-400' : 'text-chalk'}`}>
                         {participant.total_points}
                       </div>
                       <div className="text-white/30 text-xs font-body">pts</div>

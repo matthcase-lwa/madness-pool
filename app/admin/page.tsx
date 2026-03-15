@@ -136,13 +136,13 @@ export default function AdminPage() {
     loadData()
   }
 
-  const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20 w-full"
+  const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-full"
 
   if (!authed) {
     return (
       <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
         <div className="card p-8 max-w-sm w-full">
-          <h1 className="font-display text-4xl text-court-400 tracking-wider mb-6">ADMIN</h1>
+          <h1 className="font-display text-4xl text-maize-400 tracking-wider mb-6">ADMIN</h1>
           <input
             type="password"
             value={password}
@@ -164,8 +164,8 @@ export default function AdminPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 MADNESS POOL</Link>
-            <span className="text-court-500 text-sm font-body font-bold">ADMIN</span>
+            <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 BRACKETLESS MADNESS</Link>
+            <span className="text-maize-500 text-sm font-body font-bold">ADMIN</span>
           </div>
           <button onClick={() => { sessionStorage.removeItem(ADMIN_KEY); setAuthed(false) }} className="text-white/30 text-sm font-body hover:text-white/60">Logout</button>
         </div>
@@ -187,7 +187,7 @@ export default function AdminPage() {
             { label: 'Games Recorded', value: games.length },
           ].map(s => (
             <div key={s.label} className="card p-4 text-center">
-              <div className="font-display text-4xl text-court-400 tracking-wider">{s.value}</div>
+              <div className="font-display text-4xl text-maize-400 tracking-wider">{s.value}</div>
               <div className="text-white/40 text-xs font-body mt-1">{s.label}</div>
             </div>
           ))}
@@ -204,7 +204,7 @@ export default function AdminPage() {
             <button
               key={t.key}
               onClick={() => setTab(t.key as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-body font-bold transition-all ${tab === t.key ? 'bg-court-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-body font-bold transition-all ${tab === t.key ? 'bg-maize-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
             >
               {t.label}
             </button>
@@ -215,7 +215,7 @@ export default function AdminPage() {
         {tab === 'teams' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h2 className="font-display text-2xl text-court-400 tracking-wider mb-4">ADD TEAM</h2>
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">ADD TEAM</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                 <input className={inputClass} placeholder="Team name" value={teamForm.name} onChange={e => setTeamForm(f => ({ ...f, name: e.target.value }))} />
                 <input className={inputClass} placeholder="Seed (1-16)" type="number" value={teamForm.seed} onChange={e => setTeamForm(f => ({ ...f, seed: e.target.value }))} />
@@ -236,7 +236,7 @@ export default function AdminPage() {
 
             <div className="card overflow-hidden">
               <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-                <h2 className="font-display text-2xl text-court-400 tracking-wider">TEAMS ({teams.length})</h2>
+                <h2 className="font-display text-2xl text-maize-400 tracking-wider">TEAMS ({teams.length})</h2>
               </div>
               <div className="divide-y divide-white/5">
                 {teams.map(team => (
@@ -267,7 +267,7 @@ export default function AdminPage() {
         {tab === 'participants' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="font-display text-2xl text-court-400 tracking-wider">PARTICIPANTS ({participants.length})</h2>
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider">PARTICIPANTS ({participants.length})</h2>
               <button onClick={addParticipantManually} className="btn-secondary text-sm py-2">+ Add Manually</button>
             </div>
             <div className="card overflow-hidden">
@@ -296,7 +296,7 @@ export default function AdminPage() {
         {tab === 'scores' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h2 className="font-display text-2xl text-court-400 tracking-wider mb-4">RECORD GAME RESULT</h2>
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">RECORD GAME RESULT</h2>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Round</label>
@@ -339,7 +339,7 @@ export default function AdminPage() {
             {games.length > 0 && (
               <div className="card overflow-hidden">
                 <div className="px-6 py-4 border-b border-white/10">
-                  <h3 className="font-display text-xl text-court-400 tracking-wider">RECORDED GAMES</h3>
+                  <h3 className="font-display text-xl text-maize-400 tracking-wider">RECORDED GAMES</h3>
                 </div>
                 <div className="divide-y divide-white/5">
                   {[...games].reverse().map(game => {
@@ -364,7 +364,7 @@ export default function AdminPage() {
         {tab === 'import' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h2 className="font-display text-2xl text-court-400 tracking-wider mb-2">IMPORT HISTORICAL DATA</h2>
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-2">IMPORT HISTORICAL DATA</h2>
               <p className="text-white/40 text-sm font-body mb-6">
                 Paste a JSON array of past results. Each record should have: year, nickname, full_name, total_points, final_rank, teams_picked (array of team names).
               </p>
@@ -393,7 +393,7 @@ export default function AdminPage() {
             </div>
 
             <div className="card p-6">
-              <h3 className="font-display text-xl text-court-400 tracking-wider mb-3">HOW TO IMPORT PAST YEARS</h3>
+              <h3 className="font-display text-xl text-maize-400 tracking-wider mb-3">HOW TO IMPORT PAST YEARS</h3>
               <div className="text-white/50 text-sm font-body space-y-2">
                 <p>1. Open your Excel tool for a past year</p>
                 <p>2. From the "Ranks" or "Current Place" sheet, note each participant's final score and rank</p>

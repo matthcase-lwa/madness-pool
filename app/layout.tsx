@@ -14,8 +14,8 @@ const body = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'March Madness Pool',
-  description: 'The annual March Madness prediction pool',
+  title: 'Bracketless Madness',
+  description: 'The annual Bracketless Madness pool — pick 8 teams, survive the chaos',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

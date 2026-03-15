@@ -13,20 +13,33 @@ const config: Config = {
         body: ['var(--font-body)'],
       },
       colors: {
-        court: {
-          50: '#fff8ed',
-          100: '#ffefd4',
-          200: '#ffd9a8',
-          300: '#ffbc71',
-          400: '#ff9438',
-          500: '#ff7410',
-          600: '#f05906',
-          700: '#c74107',
-          800: '#9e330e',
-          900: '#7f2c0f',
+        // Maize & Blue — Michigan colors
+        maize: {
+          50:  '#fffde7',
+          100: '#fff9c4',
+          200: '#fff59d',
+          300: '#fff176',
+          400: '#ffee58',
+          500: '#FFCB05', // Official Michigan Maize
+          600: '#e6b800',
+          700: '#c9a200',
+          800: '#a68a00',
+          900: '#7a6500',
         },
-        hardwood: '#1a0f05',
-        chalk: '#faf6f0',
+        blue: {
+          50:  '#e3eaf5',
+          100: '#b9cce6',
+          200: '#8fabd6',
+          300: '#6589c6',
+          400: '#3d6ab5',
+          500: '#00274C', // Official Michigan Blue
+          600: '#002244',
+          700: '#001c38',
+          800: '#00152b',
+          900: '#000e1e',
+        },
+        hardwood: '#00172e',  // Deep michigan blue-black
+        chalk: '#f5f0e8',
       },
       animation: {
         'slide-up': 'slideUp 0.5s ease-out forwards',

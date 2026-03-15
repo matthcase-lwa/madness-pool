@@ -185,7 +185,7 @@ export default function HistoryPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 MADNESS POOL
+            🏀 BRACKETLESS MADNESS
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/enter" className="nav-link">Enter Pool</Link>
@@ -242,10 +242,10 @@ export default function HistoryPage() {
               {(() => {
                 const top = [...playerStats].filter(p => p.years.length >= 2).sort((a, b) => b.avgPoints - a.avgPoints)[0]
                 return top ? (
-                  <div className="card p-5 border-court-500/30 bg-court-500/5">
-                    <div className="text-court-400 text-xs font-body tracking-widest uppercase mb-1">Highest Avg Score</div>
+                  <div className="card p-5 border-maize-500/30 bg-maize-500/5">
+                    <div className="text-maize-400 text-xs font-body tracking-widest uppercase mb-1">Highest Avg Score</div>
                     <div className="font-display text-3xl text-chalk tracking-wider">{top.nickname}</div>
-                    <div className="text-court-400 font-bold font-body mt-1">📈 {top.avgPoints} pts/year</div>
+                    <div className="text-maize-400 font-bold font-body mt-1">📈 {top.avgPoints} pts/year</div>
                   </div>
                 ) : null
               })()}
@@ -270,7 +270,7 @@ export default function HistoryPage() {
                 placeholder="Search player..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-court-500 placeholder:text-white/20"
+                className="bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20"
               />
               <div className="flex gap-2">
                 {[
@@ -282,7 +282,7 @@ export default function HistoryPage() {
                   <button
                     key={s.key}
                     onClick={() => setSortBy(s.key as any)}
-                    className={`px-3 py-2 rounded-lg text-sm font-body transition-all ${sortBy === s.key ? 'bg-court-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                    className={`px-3 py-2 rounded-lg text-sm font-body transition-all ${sortBy === s.key ? 'bg-maize-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
                   >
                     {s.label}
                   </button>
@@ -296,7 +296,7 @@ export default function HistoryPage() {
                 <button
                   key={player.nickname}
                   onClick={() => setSelectedPlayer(selectedPlayer === player.nickname ? null : player.nickname)}
-                  className={`card-hover p-5 text-left transition-all ${selectedPlayer === player.nickname ? 'border-court-500/50 bg-court-500/10' : ''}`}
+                  className={`card-hover p-5 text-left transition-all ${selectedPlayer === player.nickname ? 'border-maize-500/50 bg-maize-500/10' : ''}`}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -304,7 +304,7 @@ export default function HistoryPage() {
                       {player.full_name && <div className="text-white/30 text-xs font-body">{player.full_name}</div>}
                     </div>
                     <div className="text-right">
-                      <div className="font-display text-3xl text-court-400 tracking-wider">{player.avgPoints}</div>
+                      <div className="font-display text-3xl text-maize-400 tracking-wider">{player.avgPoints}</div>
                       <div className="text-white/30 text-xs font-body">avg pts</div>
                     </div>
                   </div>
@@ -352,7 +352,7 @@ export default function HistoryPage() {
                       { label: 'Last Places', value: selected.lastPlaces },
                     ].map(s => (
                       <div key={s.label} className="bg-white/5 rounded-lg p-3 text-center">
-                        <div className="font-display text-3xl text-court-400 tracking-wider">{s.value}</div>
+                        <div className="font-display text-3xl text-maize-400 tracking-wider">{s.value}</div>
                         <div className="text-white/30 text-xs font-body mt-1">{s.label}</div>
                       </div>
                     ))}
@@ -361,7 +361,7 @@ export default function HistoryPage() {
                   {/* Fun facts */}
                   {selected.funFacts.length > 0 && (
                     <div className="card p-4 mb-6">
-                      <h3 className="font-display text-lg text-court-400 tracking-wider mb-3">FUN FACTS</h3>
+                      <h3 className="font-display text-lg text-maize-400 tracking-wider mb-3">FUN FACTS</h3>
                       <div className="space-y-2">
                         {selected.funFacts.map((f, i) => (
                           <div key={i} className="text-sm text-white/70 font-body">{f}</div>
@@ -372,14 +372,14 @@ export default function HistoryPage() {
 
                   {/* Year by year */}
                   <div>
-                    <h3 className="font-display text-lg text-court-400 tracking-wider mb-3">YEAR BY YEAR</h3>
+                    <h3 className="font-display text-lg text-maize-400 tracking-wider mb-3">YEAR BY YEAR</h3>
                     <div className="space-y-2">
                       {selected.yearlyScores.sort((a, b) => b.year - a.year).map(y => (
                         <div key={y.year} className="flex items-center justify-between py-2 px-3 bg-white/5 rounded-lg">
                           <span className="font-body font-bold text-chalk">{y.year}</span>
                           <div className="flex items-center gap-4">
                             <span className="text-white/50 text-sm font-body">#{y.rank}</span>
-                            <span className="font-display text-2xl text-court-400 tracking-wider">{y.points}</span>
+                            <span className="font-display text-2xl text-maize-400 tracking-wider">{y.points}</span>
                             <span className="text-white/30 text-xs font-body">pts</span>
                           </div>
                         </div>
@@ -390,13 +390,13 @@ export default function HistoryPage() {
                   {/* Top teams */}
                   {Object.keys(selected.teamFrequency).length > 0 && (
                     <div className="mt-6">
-                      <h3 className="font-display text-lg text-court-400 tracking-wider mb-3">FAVORITE TEAMS</h3>
+                      <h3 className="font-display text-lg text-maize-400 tracking-wider mb-3">FAVORITE TEAMS</h3>
                       <div className="flex flex-wrap gap-2">
                         {Object.entries(selected.teamFrequency)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 8)
                           .map(([team, count]) => (
-                            <span key={team} className={`px-3 py-1 rounded-full text-sm font-body ${count >= 3 ? 'bg-court-500/30 text-court-400 border border-court-500/40' : 'bg-white/10 text-white/50'}`}>
+                            <span key={team} className={`px-3 py-1 rounded-full text-sm font-body ${count >= 3 ? 'bg-maize-500/30 text-maize-400 border border-maize-500/40' : 'bg-white/10 text-white/50'}`}>
                               {team} {count > 1 ? `×${count}` : ''}
                             </span>
                           ))}

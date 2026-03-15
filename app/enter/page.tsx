@@ -109,7 +109,7 @@ export default function EnterPage() {
       <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
         <div className="text-center max-w-md">
           <div className="text-8xl mb-6">🏀</div>
-          <h1 className="font-display text-6xl text-court-400 tracking-wider mb-4">YOU'RE IN!</h1>
+          <h1 className="font-display text-6xl text-maize-400 tracking-wider mb-4">YOU'RE IN!</h1>
           <p className="text-white/60 mb-2 font-body">
             <strong className="text-chalk">{form.nickname}</strong>'s picks have been submitted.
           </p>
@@ -117,7 +117,7 @@ export default function EnterPage() {
             Don't forget to send $40 via Venmo or Zelle to matthcase@gmail.com
           </p>
           <div className="card p-5 mb-8 text-left">
-            <h3 className="font-display text-xl text-court-400 tracking-wider mb-3">YOUR PICKS</h3>
+            <h3 className="font-display text-xl text-maize-400 tracking-wider mb-3">YOUR PICKS</h3>
             <div className="space-y-2">
               {selectedTeams.map(t => (
                 <div key={t.id} className="flex items-center justify-between">
@@ -147,7 +147,7 @@ export default function EnterPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 MADNESS POOL
+            🏀 BRACKETLESS MADNESS
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
@@ -165,8 +165,8 @@ export default function EnterPage() {
         {/* Steps */}
         <div className="flex gap-2 mb-8">
           {['picks', 'info'].map((s, i) => (
-            <div key={s} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-body ${step === s ? 'bg-court-500 text-white' : 'bg-white/10 text-white/40'}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step === s ? 'bg-white text-court-500' : 'bg-white/20'}`}>{i + 1}</span>
+            <div key={s} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-body ${step === s ? 'bg-maize-500 text-white' : 'bg-white/10 text-white/40'}`}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step === s ? 'bg-white text-maize-500' : 'bg-white/20'}`}>{i + 1}</span>
               {s === 'picks' ? 'Select Teams' : 'Your Info'}
             </div>
           ))}
@@ -187,7 +187,7 @@ export default function EnterPage() {
                   <button
                     key={f.key}
                     onClick={() => setFilter(f.key as any)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-body transition-all ${filter === f.key ? 'bg-court-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                    className={`px-4 py-1.5 rounded-full text-sm font-body transition-all ${filter === f.key ? 'bg-maize-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
                   >
                     {f.label}
                   </button>
@@ -204,7 +204,7 @@ export default function EnterPage() {
                 <div className="space-y-6">
                   {byRegion.map(({ region, teams: rTeams }) => (
                     <div key={region}>
-                      <h3 className="font-display text-xl text-court-500/70 tracking-widest mb-3">{region.toUpperCase()}</h3>
+                      <h3 className="font-display text-xl text-maize-500/70 tracking-widest mb-3">{region.toUpperCase()}</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {rTeams.map(team => {
                           const isSelected = selected.includes(team.id)
@@ -216,7 +216,7 @@ export default function EnterPage() {
                               disabled={!canSelect}
                               className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all duration-150 font-body
                                 ${isSelected
-                                  ? 'bg-court-500/20 border-court-500 text-chalk'
+                                  ? 'bg-maize-500/20 border-maize-500 text-chalk'
                                   : canSelect
                                     ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
                                     : 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed'
@@ -226,7 +226,7 @@ export default function EnterPage() {
                               <span className="font-medium text-sm flex-1">
                                 {team.is_playin_pair ? `${team.name}/${team.playin_partner}` : team.name}
                               </span>
-                              {isSelected && <span className="text-court-400 text-xs">✓</span>}
+                              {isSelected && <span className="text-maize-400 text-xs">✓</span>}
                             </button>
                           )
                         })}
@@ -246,7 +246,7 @@ export default function EnterPage() {
                         disabled={!canSelect}
                         className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all duration-150 font-body
                           ${isSelected
-                            ? 'bg-court-500/20 border-court-500 text-chalk'
+                            ? 'bg-maize-500/20 border-maize-500 text-chalk'
                             : canSelect
                               ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
                               : 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed'
@@ -256,7 +256,7 @@ export default function EnterPage() {
                         <span className="font-medium text-sm flex-1">
                           {team.is_playin_pair ? `${team.name}/${team.playin_partner}` : team.name}
                         </span>
-                        {isSelected && <span className="text-court-400 text-xs">✓</span>}
+                        {isSelected && <span className="text-maize-400 text-xs">✓</span>}
                       </button>
                     )
                   })}
@@ -267,7 +267,7 @@ export default function EnterPage() {
             {/* Selection summary */}
             <div className="space-y-4">
               <div className="card p-5 sticky top-6">
-                <h3 className="font-display text-2xl text-court-400 tracking-wider mb-4">
+                <h3 className="font-display text-2xl text-maize-400 tracking-wider mb-4">
                   YOUR PICKS ({selected.length}/8)
                 </h3>
 
@@ -332,7 +332,7 @@ export default function EnterPage() {
             </button>
 
             <div className="card p-6 mb-6">
-              <h3 className="font-display text-2xl text-court-400 tracking-wider mb-1">YOUR PICKS</h3>
+              <h3 className="font-display text-2xl text-maize-400 tracking-wider mb-1">YOUR PICKS</h3>
               <div className="grid grid-cols-2 gap-1.5 mt-3">
                 {selectedTeams.map(t => (
                   <div key={t.id} className="flex items-center gap-2 text-sm font-body">
@@ -344,7 +344,7 @@ export default function EnterPage() {
             </div>
 
             <div className="card p-6 space-y-5">
-              <h3 className="font-display text-2xl text-court-400 tracking-wider">YOUR DETAILS</h3>
+              <h3 className="font-display text-2xl text-maize-400 tracking-wider">YOUR DETAILS</h3>
 
               <div>
                 <label className="text-white/50 text-sm font-body block mb-2">Nickname / Display Name *</label>
@@ -353,7 +353,7 @@ export default function EnterPage() {
                   value={form.nickname}
                   onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
                   placeholder="e.g. JCohen2"
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -364,7 +364,7 @@ export default function EnterPage() {
                   value={form.fullName}
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
                   placeholder="First Last"
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -375,7 +375,7 @@ export default function EnterPage() {
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                   placeholder="you@example.com"
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 
@@ -389,7 +389,7 @@ export default function EnterPage() {
                   value={form.tiebreaker}
                   onChange={e => setForm(f => ({ ...f, tiebreaker: e.target.value }))}
                   placeholder="e.g. 145"
-                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-court-500 transition-colors placeholder:text-white/20"
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20"
                 />
               </div>
 

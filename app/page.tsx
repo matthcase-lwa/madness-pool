@@ -19,7 +19,6 @@ export default function Home() {
         .eq('year', YEAR)
       setParticipantCount(count ?? 0)
 
-      // Try to get leaderboard preview
       const { data } = await supabase
         .from('participant_scores')
         .select('*')
@@ -35,19 +34,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture grain relative overflow-hidden">
-      {/* Background decorative elements */}
+      {/* Background glow elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-court-500/5 blur-3xl" />
-        <div className="absolute top-1/2 -left-48 w-96 h-96 rounded-full bg-court-600/10 blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-court-400/5 blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-maize-500/5 blur-3xl" />
+        <div className="absolute top-1/2 -left-48 w-96 h-96 rounded-full bg-maize-600/10 blur-3xl" />
+        <div className="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-maize-400/5 blur-3xl" />
       </div>
 
       {/* Nav */}
       <nav className="relative z-10 border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-display text-2xl text-court-500 tracking-wider">🏀</span>
-            <span className="font-display text-xl tracking-widest text-chalk">MADNESS POOL</span>
+            <span className="font-display text-2xl text-maize-500 tracking-wider">🏀</span>
+            <span className="font-display text-xl tracking-widest text-chalk">BRACKETLESS MADNESS</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
@@ -58,24 +57,24 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-16">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
         <div className="stagger-child animate-delay-100 mb-3">
-          <span className="text-court-500 font-body text-sm tracking-[0.3em] uppercase font-bold">
+          <span className="text-maize-500 font-body text-sm tracking-[0.3em] uppercase font-bold">
             {YEAR} Season
           </span>
         </div>
 
         <h1 className="stagger-child animate-delay-200 font-display text-8xl md:text-[10rem] leading-none text-chalk mb-6 tracking-wider">
-          MARCH<br />
-          <span className="text-court-500">MADNESS</span>
+          BRACKETLESS<br />
+          <span className="text-maize-500">MADNESS</span>
         </h1>
 
-        <p className="stagger-child animate-delay-300 text-white/50 text-lg max-w-xl mb-12 font-body leading-relaxed">
+        <p className="stagger-child animate-delay-300 text-white/50 text-lg max-w-xl mb-8 font-body leading-relaxed">
           Pick 8 teams. Survive the chaos. The annual pool where underdogs are rewarded
           and every upset matters.
         </p>
 
-        <div className="stagger-child animate-delay-400 flex flex-wrap gap-4 mb-20">
+        <div className="stagger-child animate-delay-400 flex flex-wrap gap-4 mb-10">
           <Link href="/enter" className="btn-primary text-lg px-8 py-4">
             Submit Your Picks →
           </Link>
@@ -85,7 +84,7 @@ export default function Home() {
         </div>
 
         {/* Stats row */}
-        <div className="stagger-child animate-delay-500 grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        <div className="stagger-child animate-delay-500 grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
             { label: 'Entry Fee', value: `$${ENTRY_FEE}` },
             { label: 'Players', value: participantCount !== null ? participantCount.toString() : '—' },
@@ -93,17 +92,16 @@ export default function Home() {
             { label: 'Teams to Pick', value: '8' },
           ].map(stat => (
             <div key={stat.label} className="card p-5">
-              <div className="font-display text-4xl text-court-400 tracking-wider">{stat.value}</div>
+              <div className="font-display text-4xl text-maize-400 tracking-wider">{stat.value}</div>
               <div className="text-white/40 text-xs mt-1 tracking-widest uppercase font-body">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Rules + Prizes side by side */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {/* Rules */}
+        {/* Rules + Prizes */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="card p-6">
-            <h2 className="font-display text-3xl text-court-400 tracking-wider mb-5">THE RULES</h2>
+            <h2 className="font-display text-3xl text-maize-400 tracking-wider mb-5">THE RULES</h2>
             <div className="space-y-3 text-sm text-white/70 font-body">
               <div className="accent-line">
                 <strong className="text-chalk">Pick 8 teams:</strong> 1 must be a #1 seed, 3 must be seeded #2–#4, and 4 must be seeded #5 or lower.
@@ -123,17 +121,16 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Prizes */}
           <div className="card p-6">
-            <h2 className="font-display text-3xl text-court-400 tracking-wider mb-5">PRIZE BREAKDOWN</h2>
+            <h2 className="font-display text-3xl text-maize-400 tracking-wider mb-5">PRIZE BREAKDOWN</h2>
             <div className="space-y-2">
               {prizes.places.map((p, i) => (
-                <div key={p.place} className={`flex items-center justify-between py-2.5 px-3 rounded-lg ${i === 0 ? 'bg-court-500/20 border border-court-500/30' : 'bg-white/5'}`}>
+                <div key={p.place} className={`flex items-center justify-between py-2.5 px-3 rounded-lg ${i === 0 ? 'bg-maize-500/20 border border-maize-500/30' : 'bg-white/5'}`}>
                   <div className="flex items-center gap-3">
-                    <span className={`font-display text-xl tracking-wider ${i === 0 ? 'text-court-400' : 'text-white/50'}`}>{p.place}</span>
+                    <span className={`font-display text-xl tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/50'}`}>{p.place}</span>
                     <span className="text-white/40 text-xs font-body">{p.pct}</span>
                   </div>
-                  <span className={`font-body font-bold ${i === 0 ? 'text-court-400 text-xl' : 'text-white/70'}`}>
+                  <span className={`font-body font-bold ${i === 0 ? 'text-maize-400 text-xl' : 'text-white/70'}`}>
                     ${p.amount.toLocaleString()}
                   </span>
                 </div>
@@ -145,24 +142,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Live leaderboard preview */}
+        {/* Live leaderboard preview — only shown when there are players */}
         {topPlayers.length > 0 && (
           <div className="card p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-3xl text-court-400 tracking-wider">CURRENT LEADERS</h2>
-              <Link href="/leaderboard" className="text-court-500 text-sm font-body hover:text-court-400 transition-colors">
+              <h2 className="font-display text-3xl text-maize-400 tracking-wider">CURRENT LEADERS</h2>
+              <Link href="/leaderboard" className="text-maize-500 text-sm font-body hover:text-maize-400 transition-colors">
                 Full leaderboard →
               </Link>
             </div>
             <div className="space-y-2">
               {topPlayers.map((p, i) => (
                 <div key={p.participant_id} className="flex items-center gap-4 py-3 px-4 bg-white/5 rounded-lg">
-                  <span className={`font-display text-2xl tracking-wider w-8 ${i === 0 ? 'text-court-400' : 'text-white/40'}`}>
+                  <span className={`font-display text-2xl tracking-wider w-8 ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>
                     {i === 0 ? '🏆' : `#${i + 1}`}
                   </span>
                   <span className="font-body font-bold text-chalk flex-1">{p.nickname}</span>
                   <div className="text-right">
-                    <div className="font-display text-2xl text-court-400 tracking-wide">{p.total_points}</div>
+                    <div className="font-display text-2xl text-maize-400 tracking-wide">{p.total_points}</div>
                     <div className="text-white/30 text-xs font-body">pts</div>
                   </div>
                 </div>
@@ -173,9 +170,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 px-6 py-6 mt-8">
+      <footer className="relative z-10 border-t border-white/10 px-6 py-6 mt-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-white/30 text-xs font-body">
-          <span>© {YEAR} March Madness Pool</span>
+          <span>© {YEAR} Bracketless Madness</span>
           <Link href="/admin" className="hover:text-white/50 transition-colors">Admin</Link>
         </div>
       </footer>
