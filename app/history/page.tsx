@@ -185,7 +185,7 @@ export default function HistoryPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 BRACKETLESS MADNESS
+            🏀 March "Bracketless" Madness
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/enter" className="nav-link">Enter Pool</Link>

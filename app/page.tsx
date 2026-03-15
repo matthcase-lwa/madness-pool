@@ -46,7 +46,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-display text-2xl text-maize-500 tracking-wider">🏀</span>
-            <span className="font-display text-xl tracking-widest text-chalk">BRACKETLESS MADNESS</span>
+            <span className="font-display text-xl tracking-widest text-chalk">March "Bracketless" Madness</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>

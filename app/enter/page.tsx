@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { validateSelections } from '@/lib/scoring'
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
+const POOL_PASSWORD = 'mgoblue'
+const PASS_KEY = 'bracketless_auth'
 
 interface Team {
   id: string
@@ -28,6 +30,13 @@ export default function EnterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<'all' | '1' | '2-4' | '5+'>('all')
+  const [unlocked, setUnlocked] = useState(false)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+
+  useEffect(() => {
+    if (sessionStorage.getItem(PASS_KEY) === 'true') setUnlocked(true)
+  }, [])
 
   useEffect(() => {
     supabase.from('teams').select('*').eq('year', YEAR).order('seed').then(({ data }) => {
@@ -104,6 +113,48 @@ export default function EnterPage() {
     }
   }
 
+  function handlePasswordSubmit() {
+    if (passwordInput.toLowerCase().trim() === POOL_PASSWORD) {
+      sessionStorage.setItem(PASS_KEY, 'true')
+      setUnlocked(true)
+    } else {
+      setPasswordError('Wrong password. Ask Matt for the password!')
+      setPasswordInput('')
+    }
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
+        <div className="card max-w-sm w-full p-8 text-center">
+          <div className="text-6xl mb-4">🏀</div>
+          <h1 className="font-display text-4xl text-chalk tracking-wider mb-2">ENTER THE POOL</h1>
+          <p className="text-white/40 font-body text-sm mb-8">You need the password to participate. Ask Matt if you don't have it!</p>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={e => { setPasswordInput(e.target.value); setPasswordError('') }}
+            onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
+            placeholder="Enter password..."
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-chalk font-body text-center text-lg focus:outline-none focus:border-maize-500 placeholder:text-white/20 mb-4 tracking-widest"
+          />
+          {passwordError && (
+            <p className="text-red-400 text-sm font-body mb-4">{passwordError}</p>
+          )}
+          <button
+            onClick={handlePasswordSubmit}
+            className="btn-primary w-full text-lg py-3"
+          >
+            Enter Pool →
+          </button>
+          <Link href="/" className="block mt-4 text-white/30 text-xs font-body hover:text-white/50 transition-colors">
+            ← Back to home
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   if (step === 'done') {
     return (
       <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
@@ -147,7 +198,7 @@ export default function EnterPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 BRACKETLESS MADNESS
+            🏀 March "Bracketless" Madness
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>

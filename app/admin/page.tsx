@@ -164,7 +164,7 @@ export default function AdminPage() {
       <nav className="border-b border-white/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 BRACKETLESS MADNESS</Link>
+            <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 March "Bracketless" Madness</Link>
             <span className="text-maize-500 text-sm font-body font-bold">ADMIN</span>
           </div>
           <button onClick={() => { sessionStorage.removeItem(ADMIN_KEY); setAuthed(false) }} className="text-white/30 text-sm font-body hover:text-white/60">Logout</button>
