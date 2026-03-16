@@ -71,6 +71,111 @@ function EmailExport({ year }: { year: number }) {
   )
 }
 
+function ExportPicks({ year }: { year: number }) {
+  const [loading, setLoading] = useState(false)
+  const [count, setCount] = useState<number | null>(null)
+
+  async function downloadCSV() {
+    setLoading(true)
+    try {
+      // Fetch all participants
+      const { data: participants } = await supabase
+        .from('participants')
+        .select('id, nickname, full_name, email, tiebreaker, entry_pin, payment_received')
+        .eq('year', year)
+        .order('nickname')
+
+      if (!participants || participants.length === 0) {
+        alert('No participants found.')
+        setLoading(false)
+        return
+      }
+
+      // Fetch all picks with team names
+      const ids = participants.map(p => p.id)
+      const { data: picks } = await supabase
+        .from('picks')
+        .select('participant_id, team:team_id(name, seed)')
+        .in('participant_id', ids)
+
+      // Group picks by participant
+      const pickMap: Record<string, {name: string, seed: number}[]> = {}
+      participants.forEach(p => { pickMap[p.id] = [] })
+      picks?.forEach((pk: any) => {
+        if (pk.team && pickMap[pk.participant_id]) {
+          pickMap[pk.participant_id].push(pk.team)
+        }
+      })
+      Object.keys(pickMap).forEach(id => {
+        pickMap[id].sort((a, b) => a.seed - b.seed)
+      })
+
+      // Build CSV
+      const headers = [
+        'Nickname', 'Full Name', 'Email', 'Tiebreaker', 'PIN',
+        'Paid', 'Pick 1', 'Pick 2', 'Pick 3', 'Pick 4',
+        'Pick 5', 'Pick 6', 'Pick 7', 'Pick 8'
+      ]
+
+      const rows = participants.map(p => {
+        const myPicks = pickMap[p.id] || []
+        return [
+          p.nickname,
+          p.full_name || '',
+          p.email || '',
+          p.tiebreaker ?? '',
+          p.entry_pin || '',
+          p.payment_received ? 'Yes' : 'No',
+          ...Array.from({ length: 8 }, (_, i) =>
+            myPicks[i] ? `${myPicks[i].name} (#${myPicks[i].seed})` : ''
+          )
+        ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+      })
+
+      const csv = [headers.join(','), ...rows].join('
+')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bracketless-madness-${year}-picks-backup-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      setCount(participants.length)
+    } catch (e: any) {
+      alert('Export failed: ' + e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div>
+      <button
+        onClick={downloadCSV}
+        disabled={loading}
+        className="btn-primary"
+      >
+        {loading ? 'Exporting...' : '⬇️ Download Picks CSV'}
+      </button>
+      {count !== null && (
+        <p className="text-emerald-400 text-sm font-body mt-3">
+          ✓ Exported {count} participants successfully.
+        </p>
+      )}
+      <div className="mt-6 bg-black/20 rounded-lg p-4 text-xs font-body text-white/40 space-y-2">
+        <p className="font-bold text-white/60">⚠️ Before making any changes to teams or data:</p>
+        <p>1. Click the button above to download a fresh backup</p>
+        <p>2. To fix a team name, use a targeted SQL update in Supabase — never re-run the full seed script</p>
+        <p className="font-mono bg-black/30 px-3 py-2 rounded text-white/50">
+          UPDATE teams SET name = 'New Name' WHERE year = {year} AND name = 'Old Name';
+        </p>
+        <p>3. To fix a seed, similarly: UPDATE teams SET seed = 5 WHERE year = {year} AND name = 'Team';</p>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [password, setPassword] = useState('')
@@ -274,6 +379,7 @@ export default function AdminPage() {
             { key: 'participants', label: '👥 Participants' },
             { key: 'scores', label: '📊 Enter Scores' },
             { key: 'import', label: '📥 Import History' },
+            { key: 'export', label: '💾 Export Picks' },
             { key: 'email', label: '✉️ Email List' },
           ].map(t => (
             <button
@@ -459,6 +565,21 @@ export default function AdminPage() {
         )}
 
         {/* Import tab */}
+        {tab === 'export' && (
+          <div className="space-y-6">
+            <div className="card p-6">
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-2">EXPORT PICKS BACKUP</h2>
+              <p className="text-white/40 text-sm font-body mb-2">
+                Download a complete CSV of all participant picks. Run this before making any changes to teams or the database.
+              </p>
+              <p className="text-white/30 text-xs font-body mb-6">
+                The CSV includes: nickname, full name, email, tiebreaker, PIN, payment status, and all 8 team selections.
+              </p>
+              <ExportPicks year={YEAR} />
+            </div>
+          </div>
+        )}
+
         {tab === 'import' && (
           <div className="space-y-6">
             <div className="card p-6">
