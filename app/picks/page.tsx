@@ -136,6 +136,7 @@ export default function PicksPage() {
             <div className="flex items-center gap-6">
               <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
               <Link href="/history" className="nav-link">History</Link>
+            <Link href="/my-entries" className="nav-link">My Entries</Link>
             </div>
           </div>
         </nav>

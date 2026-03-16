@@ -118,6 +118,7 @@ export default function LeaderboardPage() {
             <Link href="/enter" className="nav-link">Enter Pool</Link>
             <Link href="/history" className="nav-link">History</Link>
             <Link href="/picks" className="nav-link">All Picks</Link>
+            <Link href="/my-entries" className="nav-link">My Entries</Link>
             <ParticipantCount />
           </div>
         </div>
@@ -164,7 +165,7 @@ export default function LeaderboardPage() {
             {prizes.places.map((p, i) => (
               <div key={p.place} className={`card p-3 text-center ${i === 0 ? 'border-maize-500/40 bg-maize-500/10' : ''}`}>
                 <div className={`font-display text-lg tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{p.place}</div>
-                <div className={`font-body font-bold text-sm ${i === 0 ? 'text-maize-400' : 'text-white/60'}`}>${p.amount.toLocaleString()}</div>
+                <div className={`font-body font-bold text-xs ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{i === prizes.places.length - 1 ? 'Entry back' : 'TBD'}</div>
               </div>
             ))}
           </div>
@@ -230,13 +231,13 @@ export default function LeaderboardPage() {
                     {/* Prize amount */}
                     {isPrizePosition && prizeAmounts[participant.rank] && (
                       <div className="text-right hidden md:block">
-                        <div className="text-maize-400 font-bold text-sm font-body">${prizeAmounts[participant.rank].toLocaleString()}</div>
+                        <div className="text-maize-400 font-bold text-sm font-body">Prize TBD</div>
                         <div className="text-white/25 text-xs font-body">current prize</div>
                       </div>
                     )}
                     {isLastPlace && scores.length > 1 && (
                       <div className="text-right hidden md:block">
-                        <div className="text-white/40 font-bold text-sm font-body">$40</div>
+                        <div className="text-white/40 font-bold text-sm font-body">Entry back</div>
                         <div className="text-white/25 text-xs font-body">last place</div>
                       </div>
                     )}
@@ -299,7 +300,7 @@ export default function LeaderboardPage() {
         )}
 
         <div className="mt-8 text-center text-white/20 text-xs font-body">
-          {scores.length} participants · Pool total: ${(scores.length * ENTRY_FEE).toLocaleString()}
+          {scores.length} participants
         </div>
       </div>
     </div>

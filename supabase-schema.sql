@@ -148,3 +148,20 @@ CREATE INDEX idx_picks_participant ON picks(participant_id);
 CREATE INDEX idx_games_year_round ON games(year, round);
 CREATE INDEX idx_historical_year ON historical_results(year);
 CREATE INDEX idx_historical_nickname ON historical_results(nickname);
+
+-- ============================================
+-- SCHEMA UPDATES: Multiple entries per email
+-- Run this if you already ran the original schema
+-- ============================================
+
+-- Add index on email for fast "my entries" lookups
+CREATE INDEX IF NOT EXISTS idx_participants_email ON participants(email, year);
+
+-- Add index on nickname for fast lookups
+CREATE INDEX IF NOT EXISTS idx_participants_nickname ON participants(year, nickname);
+
+-- ============================================
+-- ADD PIN COLUMN for My Entries auth
+-- Run this in Supabase SQL Editor if already deployed
+-- ============================================
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS entry_pin TEXT;

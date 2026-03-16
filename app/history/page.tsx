@@ -46,7 +46,7 @@ function generateFunFacts(stats: PlayerStats, allStats: PlayerStats[]): string[]
   else if (stats.bestRank <= 5) facts.push(`Best finish: #${stats.bestRank} in ${stats.bestYear}`)
 
   // Last places
-  if (stats.lastPlaces > 0) facts.push(`🐢 ${stats.lastPlaces === 1 ? 'Finished last once' : `Finished last ${stats.lastPlaces} times`} — but got their $40 back!`)
+  if (stats.lastPlaces > 0) facts.push(`🐢 ${stats.lastPlaces === 1 ? 'Finished last once' : `Finished last ${stats.lastPlaces} times`} — but got their entry fee back!`)
 
   // Scoring trend
   if (entries >= 3) {

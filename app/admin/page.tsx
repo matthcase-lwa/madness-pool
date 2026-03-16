@@ -12,8 +12,64 @@ const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const ADMIN_KEY = 'madness_admin_authed'
 
 interface Team { id: string; name: string; seed: number; region: string; eliminated_round: number | null; playin_partner: string | null; is_playin_pair: boolean }
-interface Participant { id: string; nickname: string; full_name: string; email: string; payment_received: boolean; payment_method: string }
+interface Participant { id: string; nickname: string; full_name: string; email: string; payment_received: boolean; payment_method: string; entry_pin: string | null }
 interface Game { id: string; round: number; winner_team_id: string; loser_team_id: string; winner_score: number; loser_score: number }
+
+function EmailExport({ year }: { year: number }) {
+  const [emails, setEmails] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  async function loadEmails() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('participants')
+      .select('email, nickname')
+      .eq('year', year)
+      .eq('payment_received', true)
+      .not('email', 'is', null)
+    if (data) {
+      // Deduplicate emails
+      const unique = [...new Set(data.map(p => p.email).filter(Boolean))] as string[]
+      setEmails(unique.sort())
+    }
+    setLoading(false)
+  }
+
+  async function copyToClipboard() {
+    await navigator.clipboard.writeText(emails.join(', '))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div>
+      <div className="flex gap-3 mb-4">
+        <button onClick={loadEmails} disabled={loading} className="btn-primary text-sm py-2 px-4">
+          {loading ? 'Loading...' : 'Load Email List'}
+        </button>
+        {emails.length > 0 && (
+          <button onClick={copyToClipboard} className="btn-secondary text-sm py-2 px-4">
+            {copied ? '✓ Copied!' : '📋 Copy All'}
+          </button>
+        )}
+      </div>
+      {emails.length > 0 && (
+        <>
+          <p className="text-white/30 text-xs font-body mb-2">{emails.length} unique email addresses (paid participants only)</p>
+          <div className="bg-black/30 rounded-lg p-4 font-mono text-xs text-white/60 max-h-64 overflow-y-auto leading-relaxed">
+            {emails.join(', ')}
+          </div>
+          <div className="mt-4 space-y-1">
+            {emails.map(e => (
+              <div key={e} className="text-white/50 text-sm font-body">{e}</div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
@@ -47,7 +103,7 @@ export default function AdminPage() {
     setLoading(true)
     const [teamsRes, partsRes, gamesRes] = await Promise.all([
       supabase.from('teams').select('*').eq('year', YEAR).order('seed'),
-      supabase.from('participants').select('*').eq('year', YEAR).order('nickname'),
+      supabase.from('participants').select('id, nickname, full_name, email, payment_received, payment_method, entry_pin').eq('year', YEAR).order('nickname'),
       supabase.from('games').select('*').eq('year', YEAR).order('round'),
     ])
     if (teamsRes.data) setTeams(teamsRes.data)
@@ -109,6 +165,21 @@ export default function AdminPage() {
       setMsg('✓ Game result saved!')
       loadData()
     } else setMsg(`Error: ${error.message}`)
+  }
+
+  async function resetPin(participantId: string, nickname: string) {
+    const newPin = prompt(`Reset PIN for ${nickname}. Enter new 4-digit PIN:`)
+    if (!newPin) return
+    if (!/^[0-9]{4}$/.test(newPin)) {
+      setMsg('❌ PIN must be exactly 4 digits')
+      return
+    }
+    const { error } = await supabase
+      .from('participants')
+      .update({ entry_pin: newPin })
+      .eq('id', participantId)
+    if (error) setMsg(`Error: ${error.message}`)
+    else setMsg(`✓ PIN reset for ${nickname} — new PIN: ${newPin}`)
   }
 
   async function togglePayment(participantId: string, current: boolean) {
@@ -203,6 +274,7 @@ export default function AdminPage() {
             { key: 'participants', label: '👥 Participants' },
             { key: 'scores', label: '📊 Enter Scores' },
             { key: 'import', label: '📥 Import History' },
+            { key: 'email', label: '✉️ Email List' },
           ].map(t => (
             <button
               key={t.key}
@@ -282,11 +354,21 @@ export default function AdminPage() {
                       {p.full_name && <div className="text-white/30 text-xs font-body">{p.full_name}</div>}
                     </div>
                     {p.email && <div className="text-white/30 text-xs font-body hidden md:block">{p.email}</div>}
+                    <div className="text-white/20 text-xs font-body hidden lg:block font-mono">
+                      PIN: {p.entry_pin || <span className="text-red-400/50">none</span>}
+                    </div>
                     <button
                       onClick={() => togglePayment(p.id, p.payment_received)}
                       className={`px-3 py-1 rounded-full text-xs font-bold font-body transition-all ${p.payment_received ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}
                     >
                       {p.payment_received ? '✓ Paid' : '✗ Unpaid'}
+                    </button>
+                    <button
+                      onClick={() => resetPin(p.id, p.nickname)}
+                      className="px-3 py-1 rounded-full text-xs font-bold font-body bg-white/10 text-white/40 hover:bg-white/20 hover:text-white/70 transition-all"
+                      title="Reset PIN"
+                    >
+                      🔑 PIN
                     </button>
                   </div>
                 ))}
@@ -360,6 +442,19 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Email list tab */}
+        {tab === 'email' && (
+          <div className="space-y-6">
+            <div className="card p-6">
+              <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-2">EMAIL LIST</h2>
+              <p className="text-white/40 text-sm font-body mb-6">
+                Unique email addresses for all paid participants — ready to paste into your email client for round updates.
+              </p>
+              <EmailExport year={YEAR} />
+            </div>
           </div>
         )}
 

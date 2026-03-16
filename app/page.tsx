@@ -57,6 +57,7 @@ export default function Home() {
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/history" className="nav-link">History</Link>
+            <Link href="/my-entries" className="nav-link">My Entries</Link>
             <ParticipantCount />
             <Link href="/enter" className="btn-primary text-sm py-2 px-4">Enter Pool</Link>
           </div>
@@ -104,9 +105,9 @@ export default function Home() {
         {/* Stats row */}
         <div className="stagger-child animate-delay-500 grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: 'Entry Fee', value: `$${ENTRY_FEE}` },
+            { label: 'Entry Fee', value: 'Ask Matt' },
             { label: 'Players', value: participantCount !== null ? participantCount.toString() : '—' },
-            { label: 'Prize Pool', value: participantCount ? `$${prizes.pool.toLocaleString()}` : '—' },
+            { label: 'Prize Pool', value: 'TBD' },
             { label: 'Teams to Pick', value: '8' },
           ].map(stat => (
             <div key={stat.label} className="card p-5">
@@ -134,7 +135,7 @@ export default function Home() {
                 <strong className="text-chalk">Tiebreaker:</strong> Predict total points scored in the championship game. Closest wins; furthest wins last place.
               </div>
               <div className="accent-line">
-                <strong className="text-chalk">Payment:</strong> $40 via Venmo or Zelle to matthcase@gmail.com.
+                <strong className="text-chalk">Payment:</strong> Entry fee via Venmo or Zelle to matthcase@gmail.com.
               </div>
             </div>
           </div>
@@ -148,14 +149,13 @@ export default function Home() {
                     <span className={`font-display text-xl tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/50'}`}>{p.place}</span>
                     <span className="text-white/40 text-xs font-body">{p.pct}</span>
                   </div>
-                  <span className={`font-body font-bold ${i === 0 ? 'text-maize-400 text-xl' : 'text-white/70'}`}>
-                    ${p.amount.toLocaleString()}
+                  <span className={`font-body font-bold text-right ${i === 0 ? 'text-maize-400' : 'text-white/50'} text-xs`}>
+                    {i === prizes.places.length - 1
+                      ? 'Entry fee back'
+                      : 'Updates at tip-off'}
                   </span>
                 </div>
               ))}
-              {participantCount === null && (
-                <p className="text-white/30 text-xs mt-2 font-body italic">Amounts update as entries come in</p>
-              )}
             </div>
           </div>
         </div>

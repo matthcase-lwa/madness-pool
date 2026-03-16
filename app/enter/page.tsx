@@ -31,7 +31,7 @@ function SeedBadge({ seed }: { seed: number }) {
 export default function EnterPage() {
   const [teams, setTeams] = useState<Team[]>([])
   const [selected, setSelected] = useState<string[]>([])
-  const [form, setForm] = useState({ nickname: '', fullName: '', email: '', tiebreaker: '' })
+  const [form, setForm] = useState({ nickname: '', fullName: '', email: '', tiebreaker: '', pin: '' })
   const [step, setStep] = useState<'picks' | 'info' | 'done'>('picks')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -87,6 +87,20 @@ export default function EnterPage() {
     setError('')
 
     try {
+      // Check for duplicate nickname
+      const { data: existing } = await supabase
+        .from('participants')
+        .select('id')
+        .eq('year', YEAR)
+        .eq('nickname', form.nickname.trim())
+        .single()
+
+      if (existing) {
+        setError(`The nickname "${form.nickname.trim()}" is already taken. Try adding a number like ${form.nickname.trim()}2.`)
+        setLoading(false)
+        return
+      }
+
       // Create participant
       const { data: participant, error: pErr } = await supabase
         .from('participants')
@@ -96,6 +110,7 @@ export default function EnterPage() {
           full_name: form.fullName.trim(),
           email: form.email.trim(),
           tiebreaker: form.tiebreaker ? parseInt(form.tiebreaker) : null,
+          entry_pin: form.pin.trim(),
         })
         .select()
         .single()
@@ -118,6 +133,10 @@ export default function EnterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function isPinValid(pin: string) {
+    return /^[0-9]{4}$/.test(pin)
   }
 
   function handlePasswordSubmit() {
@@ -190,8 +209,12 @@ export default function EnterPage() {
           <p className="text-white/60 mb-2 font-body">
             <strong className="text-chalk">{form.nickname}</strong>'s picks have been submitted.
           </p>
+          <div className="card p-4 mb-6 border-maize-500/30 bg-maize-500/5">
+            <div className="text-maize-400 font-bold font-body text-sm mb-1">🔑 Remember your PIN: <span className="font-display text-2xl tracking-widest">{form.pin}</span></div>
+            <div className="text-white/40 text-xs font-body">You'll need your email + this PIN to view your entries during the tournament.</div>
+          </div>
           <p className="text-white/40 text-sm mb-8 font-body">
-            Don't forget to send $40 via Venmo or Zelle to matthcase@gmail.com
+            Don't forget to send your entry fee via Venmo or Zelle to matthcase@gmail.com
           </p>
           <div className="card p-5 mb-8 text-left">
             <h3 className="font-display text-xl text-maize-400 tracking-wider mb-3">YOUR PICKS</h3>
@@ -209,9 +232,19 @@ export default function EnterPage() {
               </div>
             )}
           </div>
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/leaderboard" className="btn-primary">View Leaderboard</Link>
-            <Link href="/" className="btn-secondary">Home</Link>
+            <button
+              onClick={() => {
+                setStep('picks')
+                setSelected([])
+                setForm(f => ({ ...f, nickname: '', tiebreaker: '' }))
+              }}
+              className="btn-secondary"
+            >
+              Submit Another Entry
+            </button>
+            <Link href="/my-entries" className="btn-secondary">My Entries</Link>
           </div>
         </div>
       </div>
@@ -427,12 +460,13 @@ export default function EnterPage() {
               <h3 className="font-display text-2xl text-maize-400 tracking-wider">YOUR DETAILS</h3>
 
               <div>
-                <label className="text-white/50 text-sm font-body block mb-2">Nickname / Display Name *</label>
+                <label className="text-white/50 text-sm font-body block mb-1">Nickname / Display Name *</label>
+                <p className="text-white/30 text-xs font-body mb-2">Must be unique. Entering multiple times? Use Matt1, Matt2, etc.</p>
                 <input
                   type="text"
                   value={form.nickname}
                   onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
-                  placeholder="e.g. JCohen2"
+                  placeholder="e.g. MattCase1"
                   className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20"
                 />
               </div>
@@ -449,7 +483,8 @@ export default function EnterPage() {
               </div>
 
               <div>
-                <label className="text-white/50 text-sm font-body block mb-2">Email</label>
+                <label className="text-white/50 text-sm font-body block mb-1">Email</label>
+                <p className="text-white/30 text-xs font-body mb-2">Used for round-by-round score updates. Multiple entries can share the same email.</p>
                 <input
                   type="email"
                   value={form.email}
@@ -473,6 +508,19 @@ export default function EnterPage() {
                 />
               </div>
 
+              <div>
+                <label className="text-white/50 text-sm font-body block mb-1">4-Digit PIN *</label>
+                <p className="text-white/30 text-xs font-body mb-2">You'll use this with your email to view your entries after the tournament starts. Don't forget it!</p>
+                <input
+                  type="number"
+                  value={form.pin}
+                  onChange={e => setForm(f => ({ ...f, pin: e.target.value.slice(0, 4) }))}
+                  placeholder="e.g. 1234"
+                  maxLength={4}
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 transition-colors placeholder:text-white/20 tracking-[0.5em] text-center text-xl"
+                />
+              </div>
+
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm font-body">
                   {error}
@@ -481,7 +529,7 @@ export default function EnterPage() {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.nickname.trim() || loading}
+                disabled={!form.nickname.trim() || !isPinValid(form.pin) || loading}
                 className={`w-full py-4 rounded-lg font-bold font-body text-lg transition-all ${form.nickname.trim()
                   ? 'btn-primary'
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
@@ -491,7 +539,7 @@ export default function EnterPage() {
               </button>
 
               <p className="text-white/30 text-xs font-body text-center">
-                After submitting, send $40 via Venmo/Zelle to matthcase@gmail.com
+                After submitting, send your entry fee via Venmo/Zelle to matthcase@gmail.com
               </p>
             </div>
           </div>
