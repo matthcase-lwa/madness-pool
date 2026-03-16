@@ -373,7 +373,8 @@ function PicksEditor({
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
-  const [tab, setTab] = useState<'teams' | 'participants' | 'scores' | 'import'>('teams')
+  const [tab, setTab] = useState<'teams' | 'participants' | 'scores' | 'import' | 'export' | 'email'>('teams')
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
   const [teams, setTeams] = useState<Team[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
   const [games, setGames] = useState<Game[]>([])
