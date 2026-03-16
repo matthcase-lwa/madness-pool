@@ -212,7 +212,7 @@ export default function EnterPage() {
           </p>
           <div className="card p-4 mb-6 border-maize-500/30 bg-maize-500/5">
             <div className="text-maize-400 font-bold font-body text-sm mb-1">🔑 Remember your PIN: <span className="font-display text-2xl tracking-widest">{form.pin}</span></div>
-            <div className="text-white/40 text-xs font-body">You'll need your email + this PIN to view your entries during the tournament.</div>
+            <div className="text-white/40 text-xs font-body">Your picks are private until tip-off. Use this PIN + your email to view them beforehand on the My Entries page.</div>
           </div>
           <p className="text-white/40 text-sm mb-8 font-body">
             Don't forget to send your entry fee via Venmo or Zelle to matthcase@gmail.com
@@ -544,7 +544,7 @@ export default function EnterPage() {
 
               <div>
                 <label className="text-white/50 text-sm font-body block mb-1">4-Digit PIN *</label>
-                <p className="text-white/30 text-xs font-body mb-2">You'll use this with your email to view your entries after the tournament starts. Don't forget it!</p>
+                <p className="text-white/30 text-xs font-body mb-2">Keeps your picks private until tip-off — so no one can see your selections before the tournament begins.</p>
                 <input
                   type="number"
                   value={form.pin}

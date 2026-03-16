@@ -32,7 +32,7 @@ const STEPS = [
   {
     icon: '🔑',
     title: 'Tracking Your Entries',
-    body: "After you submit, you'll get a PIN. Keep it safe — you'll need your email + PIN to view your picks and scores during the tournament on the \"My Entries\" page.\n\nEntering multiple times? Use a different nickname each time (Matt1, Matt2, etc.) with the same email.",
+    body: "After you submit, you'll set a 4-digit PIN. Before the tournament tips off, you'll need your email + PIN to view — and modify — your picks on the \"My Entries\" page. This keeps your selections private so no one can copy your strategy!\n\nOnce the tournament starts, picks are locked and become visible to everyone. Entering multiple times? Use a different nickname each time (Matt1, Matt2, etc.) with the same email.",
     cta: null,
   },
   {

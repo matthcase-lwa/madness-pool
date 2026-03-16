@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
+const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')
 
 interface Team {
@@ -71,12 +72,15 @@ export default function MyEntriesPage() {
       return
     }
 
-    // Verify PIN matches at least one entry for this email
-    const pinMatches = participants.some(p => p.entry_pin === pin.trim())
-    if (!pinMatches) {
-      setError('Incorrect PIN. Check your confirmation screen or contact Matt to reset it.')
-      setLoading(false)
-      return
+    // Only enforce PIN before tipoff — after tipoff picks are public
+    const pastDeadline = new Date() >= DEADLINE
+    if (!pastDeadline) {
+      const pinMatches = participants.some(p => p.entry_pin === pin.trim())
+      if (!pinMatches) {
+        setError('Incorrect PIN. Check your confirmation screen or contact Matt to reset it.')
+        setLoading(false)
+        return
+      }
     }
 
     // Get scores from view
@@ -121,7 +125,9 @@ export default function MyEntriesPage() {
   }, [])
 
   function handleLookup() {
-    if (!email.trim() || !pin.trim()) return
+    if (!email.trim()) return
+    const pastDeadline = new Date() >= DEADLINE
+    if (!pastDeadline && pin.length !== 4) return
     loadEntries(email, pin)
   }
 
@@ -245,7 +251,7 @@ export default function MyEntriesPage() {
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="font-display text-6xl text-chalk tracking-wider">MY ENTRIES</h1>
-          <p className="text-white/40 font-body mt-2">Look up all your submissions by email address</p>
+          <p className="text-white/40 font-body mt-2">Before tip-off, use your PIN to keep your picks private. After tip-off, everyone can see all picks openly.</p>
         </div>
 
         {/* Email lookup */}
@@ -263,24 +269,28 @@ export default function MyEntriesPage() {
               placeholder="your@email.com"
               className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 placeholder:text-white/20 mb-4"
             />
-            <label className="text-white/50 text-sm font-body block mb-2">4-Digit PIN</label>
-            <input
-              type="number"
-              value={pin}
-              onChange={e => setPin(e.target.value.slice(0, 4))}
-              onKeyDown={e => e.key === 'Enter' && handleLookup()}
-              placeholder="••••"
-              maxLength={4}
-              className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 placeholder:text-white/20 mb-4 tracking-[0.5em] text-center text-xl"
-            />
-            <p className="text-white/20 text-xs font-body mb-4">Your PIN was shown on the confirmation screen when you submitted your picks. Contact Matt if you've forgotten it.</p>
+{new Date() < DEADLINE && <label className="text-white/50 text-sm font-body block mb-2">4-Digit PIN <span className="text-white/30 font-normal">(keeps picks private until tip-off)</span></label>}
+{new Date() < DEADLINE && (
+              <>
+                <input
+                  type="number"
+                  value={pin}
+                  onChange={e => setPin(e.target.value.slice(0, 4))}
+                  onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                  placeholder="••••"
+                  maxLength={4}
+                  className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body focus:outline-none focus:border-maize-500 placeholder:text-white/20 mb-4 tracking-[0.5em] text-center text-xl"
+                />
+                <p className="text-white/20 text-xs font-body mb-4">Your PIN was set when you submitted picks. It keeps your selections private until tip-off. Contact Matt if you've forgotten it.</p>
+              </>
+            )}
             {error && <p className="text-red-400 text-sm font-body mb-3">{error}</p>}
             <button
               onClick={handleLookup}
-              disabled={!email.trim() || pin.length !== 4 || loading}
-              className={`w-full py-3 rounded-lg font-bold font-body transition-all ${email.trim() && pin.length === 4 ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+              disabled={!email.trim() || (new Date() < DEADLINE && pin.length !== 4) || loading}
+              className={`w-full py-3 rounded-lg font-bold font-body transition-all ${email.trim() && (new Date() >= DEADLINE || pin.length === 4) ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
             >
-              {loading ? 'Verifying...' : 'View My Entries →'}
+              {loading ? 'Looking up...' : 'View My Entries →'}
             </button>
           </div>
         )}
