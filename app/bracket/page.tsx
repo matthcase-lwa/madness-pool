@@ -387,18 +387,18 @@ export default function BracketPage() {
                   )}
                 </div>
 
-                {/* RIGHT SIDE — Midwest + West (flipped) */}
+                {/* RIGHT SIDE — West (inner, closest to center) + Midwest (outer) */}
                 <div className="flex gap-3 flex-row-reverse">
-                  {/* Midwest */}
-                  <div>
-                    <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['Midwest'].split(' ')[0]}`}>MIDWEST</div>
-                    <RegionBracket region="Midwest" games={midwestGames} liveData={liveData} flip />
-                  </div>
-
-                  {/* West */}
+                  {/* Midwest — renders on far right due to flex-row-reverse */}
                   <div>
                     <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['West'].split(' ')[0]}`}>WEST</div>
                     <RegionBracket region="West" games={westGames} liveData={liveData} flip />
+                  </div>
+
+                  {/* West — renders closer to center due to flex-row-reverse */}
+                  <div>
+                    <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['Midwest'].split(' ')[0]}`}>MIDWEST</div>
+                    <RegionBracket region="Midwest" games={midwestGames} liveData={liveData} flip />
                   </div>
                 </div>
               </div>
