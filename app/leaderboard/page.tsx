@@ -7,6 +7,7 @@ const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes, ROUND_NAMES } from '@/lib/scoring'
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')

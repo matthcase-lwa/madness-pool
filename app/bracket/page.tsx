@@ -8,6 +8,7 @@ import { BRACKET_2026, BracketGame, BracketTeam, REGION_COLORS, ROUND_LABELS } f
 
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 

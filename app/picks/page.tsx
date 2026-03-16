@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false })
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')

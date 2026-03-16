@@ -4,6 +4,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 
 interface HistoricalEntry {

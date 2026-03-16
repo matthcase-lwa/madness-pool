@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { validateSelections } from '@/lib/scoring'
 import Countdown from '@/components/Countdown'
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 
