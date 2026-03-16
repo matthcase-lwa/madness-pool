@@ -266,21 +266,7 @@ export default function BracketPage() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture">
-      <nav className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-full mx-auto flex items-center justify-between">
-          <Link href="/" className="font-display text-xl tracking-widest text-chalk shrink-0">
-            🏀 March "Bracketless" Madness
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
-            <Link href="/bracket" className="nav-link">Bracket</Link>
-            <Link href="/picks" className="nav-link">All Picks</Link>
-            <Link href="/history" className="nav-link">History</Link>
-            <NavCTA />
-            <ParticipantCount />
-          </div>
-        </div>
-      </nav>
+      <SiteNav />
 
       <div className="px-4 py-6">
         {/* Header */}

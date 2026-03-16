@@ -78,7 +78,7 @@ export default function Tour() {
     return (
       <button
         onClick={() => { setStep(0); setVisible(true) }}
-        className="text-white/30 hover:text-white/60 text-xs font-body transition-colors flex items-center gap-1"
+        className="flex items-center gap-1.5 text-xs font-body font-bold px-3 py-1.5 rounded-full border border-white/20 text-white/60 hover:text-maize-400 hover:border-maize-500/50 transition-all"
         title="How to play"
       >
         <span>❓</span> How to play

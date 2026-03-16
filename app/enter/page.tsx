@@ -258,21 +258,7 @@ export default function EnterPage() {
   return (
     <div className="min-h-screen bg-hardwood court-texture">
       {/* Nav */}
-      <nav className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="font-display text-xl tracking-widest text-chalk">
-            🏀 March "Bracketless" Madness
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
-            <Link href="/bracket" className="nav-link">Bracket</Link>
-            <Link href="/picks" className="nav-link">All Picks</Link>
-            <Link href="/history" className="nav-link">History</Link>
-            <NavCTA />
-            <ParticipantCount />
-          </div>
-        </div>
-      </nav>
+      <SiteNav />
 
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="mb-8">

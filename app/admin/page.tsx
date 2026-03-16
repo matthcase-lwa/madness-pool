@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { ROUND_NAMES } from '@/lib/scoring'
 
@@ -531,16 +532,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture">
-      <nav className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 March "Bracketless" Madness</Link>
-            <span className="text-maize-500 text-sm font-body font-bold">ADMIN</span>
-          </div>
-          <ParticipantCount />
-          <button onClick={() => { sessionStorage.removeItem(ADMIN_KEY); setAuthed(false) }} className="text-white/30 text-sm font-body hover:text-white/60">Logout</button>
-        </div>
-      </nav>
+      <SiteNav />
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {msg && (
