@@ -370,7 +370,7 @@ function PicksEditor({
 }
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false)
+  const [authed, setAuthed] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
   const [tab, setTab] = useState<'teams' | 'participants' | 'scores' | 'import'>('teams')
   const [teams, setTeams] = useState<Team[]>([])
@@ -508,6 +508,11 @@ export default function AdminPage() {
   }
 
   const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-full"
+
+  // Still checking auth state (avoids SSR hydration mismatch)
+  if (authed === null) {
+    return <div className="min-h-screen bg-hardwood court-texture" />
+  }
 
   if (!authed) {
     return (
