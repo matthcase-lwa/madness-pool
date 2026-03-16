@@ -7,6 +7,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    domains: ['a.espncdn.com'],
+  },
 }
 
 module.exports = nextConfig

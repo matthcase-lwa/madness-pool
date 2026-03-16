@@ -1,8 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ParticipantCount from '@/components/ParticipantCount'
 import { supabase } from '@/lib/supabase'
 import { validateSelections } from '@/lib/scoring'
+import Countdown from '@/components/Countdown'
+import TeamBadge from '@/components/TeamBadge'
+
+const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const POOL_PASSWORD = 'mgoblue'
@@ -33,6 +38,7 @@ export default function EnterPage() {
   const [unlocked, setUnlocked] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [entriesOpen, setEntriesOpen] = useState(new Date() < DEADLINE)
 
   useEffect(() => {
     if (sessionStorage.getItem(PASS_KEY) === 'true') setUnlocked(true)
@@ -155,6 +161,25 @@ export default function EnterPage() {
     )
   }
 
+  if (!entriesOpen) {
+    return (
+      <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
+        <div className="card max-w-md w-full p-8 text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h1 className="font-display text-4xl text-chalk tracking-wider mb-3">ENTRIES CLOSED</h1>
+          <p className="text-white/50 font-body mb-6">
+            The entry window closed at the first tip-off of the tournament.
+            Check the leaderboard to see how everyone is doing!
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/leaderboard" className="btn-primary">View Leaderboard</Link>
+            <Link href="/picks" className="btn-secondary">View All Picks</Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (step === 'done') {
     return (
       <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
@@ -203,6 +228,7 @@ export default function EnterPage() {
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/history" className="nav-link">History</Link>
+            <ParticipantCount />
           </div>
         </div>
       </nav>
@@ -211,6 +237,11 @@ export default function EnterPage() {
         <div className="mb-8">
           <h1 className="font-display text-6xl text-chalk tracking-wider mb-2">SUBMIT YOUR PICKS</h1>
           <p className="text-white/50 font-body">Select 8 teams following the seed rules below.</p>
+        </div>
+
+        {/* Countdown */}
+        <div className="mb-6">
+          <Countdown deadline={DEADLINE} onExpired={() => setEntriesOpen(false)} />
         </div>
 
         {/* Steps */}
@@ -384,12 +415,9 @@ export default function EnterPage() {
 
             <div className="card p-6 mb-6">
               <h3 className="font-display text-2xl text-maize-400 tracking-wider mb-1">YOUR PICKS</h3>
-              <div className="grid grid-cols-2 gap-1.5 mt-3">
+              <div className="space-y-2 mt-3">
                 {selectedTeams.map(t => (
-                  <div key={t.id} className="flex items-center gap-2 text-sm font-body">
-                    <SeedBadge seed={t.seed} />
-                    <span className="text-white/70">{t.is_playin_pair ? `${t.name}/${t.playin_partner}` : t.name}</span>
-                  </div>
+                  <TeamBadge key={t.id} name={t.name} seed={t.seed} showRecord={true} size="sm" />
                 ))}
               </div>
             </div>

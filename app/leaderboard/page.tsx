@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import ParticipantCount from '@/components/ParticipantCount'
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes, ROUND_NAMES } from '@/lib/scoring'
+import TeamBadge from '@/components/TeamBadge'
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')
@@ -114,6 +116,8 @@ export default function LeaderboardPage() {
           <div className="flex items-center gap-6">
             <Link href="/enter" className="nav-link">Enter Pool</Link>
             <Link href="/history" className="nav-link">History</Link>
+            <Link href="/picks" className="nav-link">All Picks</Link>
+            <ParticipantCount />
           </div>
         </div>
       </nav>
@@ -261,17 +265,20 @@ export default function LeaderboardPage() {
                             return (
                               <div
                                 key={team.id}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-body border ${
+                                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm border ${
                                   alive
-                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-chalk'
-                                    : 'bg-white/5 border-white/10 text-white/30 line-through'
+                                    ? 'bg-emerald-500/10 border-emerald-500/20'
+                                    : 'bg-white/5 border-white/10'
                                 }`}
                               >
-                                <span className={`seed-badge ${team.seed === 1 ? 'seed-1' : team.seed <= 4 ? 'seed-2' : team.seed >= 9 ? 'seed-9plus' : 'seed-5plus'}`}>
-                                  #{team.seed}
-                                </span>
-                                <span className="truncate">{team.name}</span>
-                                {alive && <span className="text-emerald-400 ml-auto">●</span>}
+                                <TeamBadge
+                                  name={team.name}
+                                  seed={team.seed}
+                                  showRecord={true}
+                                  size="sm"
+                                  eliminated={!alive}
+                                />
+                                {alive && <span className="text-emerald-400 text-xs ml-2">●</span>}
                               </div>
                             )
                           })}

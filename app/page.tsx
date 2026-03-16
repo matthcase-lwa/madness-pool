@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes } from '@/lib/scoring'
+import Countdown from '@/components/Countdown'
+
+const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')
@@ -10,6 +13,7 @@ const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')
 export default function Home() {
   const [participantCount, setParticipantCount] = useState<number | null>(null)
   const [topPlayers, setTopPlayers] = useState<any[]>([])
+  const [entriesOpen, setEntriesOpen] = useState(new Date() < DEADLINE)
 
   useEffect(() => {
     async function load() {
@@ -51,6 +55,7 @@ export default function Home() {
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/history" className="nav-link">History</Link>
+            <ParticipantCount />
             <Link href="/enter" className="btn-primary text-sm py-2 px-4">Enter Pool</Link>
           </div>
         </div>
@@ -74,10 +79,21 @@ export default function Home() {
           and every upset matters.
         </p>
 
+        {/* Countdown or locked message */}
+        <div className="stagger-child animate-delay-350 mb-6">
+          <Countdown deadline={DEADLINE} compact onExpired={() => setEntriesOpen(false)} />
+        </div>
+
         <div className="stagger-child animate-delay-400 flex flex-wrap gap-4 mb-10">
-          <Link href="/enter" className="btn-primary text-lg px-8 py-4">
-            Submit Your Picks →
-          </Link>
+          {entriesOpen ? (
+            <Link href="/enter" className="btn-primary text-lg px-8 py-4">
+              Submit Your Picks →
+            </Link>
+          ) : (
+            <Link href="/picks" className="btn-primary text-lg px-8 py-4">
+              View All Picks →
+            </Link>
+          )}
           <Link href="/leaderboard" className="btn-secondary text-lg px-8 py-4">
             View Leaderboard
           </Link>

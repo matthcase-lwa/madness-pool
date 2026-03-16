@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ParticipantCount from '@/components/ParticipantCount'
 import { supabase } from '@/lib/supabase'
 import { ROUND_NAMES } from '@/lib/scoring'
 
@@ -167,6 +168,7 @@ export default function AdminPage() {
             <Link href="/" className="font-display text-xl tracking-widest text-chalk">🏀 March "Bracketless" Madness</Link>
             <span className="text-maize-500 text-sm font-body font-bold">ADMIN</span>
           </div>
+          <ParticipantCount />
           <button onClick={() => { sessionStorage.removeItem(ADMIN_KEY); setAuthed(false) }} className="text-white/30 text-sm font-body hover:text-white/60">Logout</button>
         </div>
       </nav>

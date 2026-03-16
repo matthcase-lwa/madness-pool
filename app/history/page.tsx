@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ParticipantCount from '@/components/ParticipantCount'
 import { supabase } from '@/lib/supabase'
 
 interface HistoricalEntry {
