@@ -192,6 +192,7 @@ export default function HistoryPage() {
           <div className="flex items-center gap-6">
             <Link href="/enter" className="nav-link">Enter Pool</Link>
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/bracket" className="nav-link">Bracket</Link>
           </div>
         </div>
       </nav>

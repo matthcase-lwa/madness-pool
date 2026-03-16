@@ -40,6 +40,7 @@ export default function EnterPage() {
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [entriesOpen, setEntriesOpen] = useState(new Date() < DEADLINE)
+  const [showScoring, setShowScoring] = useState(false)
 
   useEffect(() => {
     if (sessionStorage.getItem(PASS_KEY) === 'true') setUnlocked(true)
@@ -261,6 +262,7 @@ export default function EnterPage() {
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/bracket" className="nav-link">Bracket</Link>
             <Link href="/history" className="nav-link">History</Link>
             <ParticipantCount />
           </div>
@@ -276,6 +278,38 @@ export default function EnterPage() {
         {/* Countdown */}
         <div className="mb-6">
           <Countdown deadline={DEADLINE} onExpired={() => setEntriesOpen(false)} />
+        </div>
+
+        {/* Scoring quick reference */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowScoring(s => !s)}
+            className="flex items-center gap-2 text-sm font-body text-maize-400 hover:text-maize-300 transition-colors"
+          >
+            <span className={`transition-transform duration-200 ${showScoring ? 'rotate-90' : ''}`}>▶</span>
+            {showScoring ? 'Hide' : 'Show'} scoring guide
+          </button>
+
+          {showScoring && (
+            <div className="mt-3 card p-5 border-maize-500/20">
+              <h3 className="font-display text-lg text-maize-400 tracking-wider mb-3">HOW SCORING WORKS</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs font-body mb-4">
+                <div className="text-white/40">Round of 64 win</div><div className="text-chalk font-bold">1 pt</div>
+                <div className="text-white/40">Round of 32 win</div><div className="text-chalk font-bold">2 pts</div>
+                <div className="text-white/40">Sweet 16 win</div><div className="text-chalk font-bold">3 pts</div>
+                <div className="text-white/40">Elite 8 win</div><div className="text-chalk font-bold">4 pts</div>
+                <div className="text-white/40">Final Four win</div><div className="text-chalk font-bold">5 pts</div>
+                <div className="text-white/40">Championship win</div><div className="text-chalk font-bold">6 pts</div>
+              </div>
+              <div className="space-y-2 text-xs font-body border-t border-white/10 pt-3">
+                <div><span className="text-emerald-400 font-bold">+3 pts</span> <span className="text-white/50">for any win by seed #9 or lower</span> <span className="text-white/30 italic">— this is why picking underdogs matters!</span></div>
+                <div><span className="text-maize-400 font-bold">+1 pt</span> <span className="text-white/50">per 10-point margin of victory</span> <span className="text-white/30 italic">(win by 22 = +2 pts)</span></div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-white/10 bg-white/5 rounded-lg px-3 py-2 text-xs font-body text-white/40 italic">
+                💡 Example: your #12 seed wins the Round of 64 by 18 points → 1 pt + 3 pts (underdog) + 1 pt (margin) = <span className="text-chalk font-bold not-italic">5 pts</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Steps */}

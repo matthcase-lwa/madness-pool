@@ -235,6 +235,7 @@ export default function MyEntriesPage() {
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/bracket" className="nav-link">Bracket</Link>
             <Link href="/picks" className="nav-link">All Picks</Link>
             <Link href="/enter" className="nav-link">Enter Pool</Link>
           </div>

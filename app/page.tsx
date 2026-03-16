@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes } from '@/lib/scoring'
 const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false })
+const Tour = dynamic(() => import('@/components/Tour'), { ssr: false })
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 
@@ -40,6 +41,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-hardwood court-texture grain relative overflow-hidden">
+      {/* First-visit tour */}
+      <Tour />
+
       {/* Background glow elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-maize-500/5 blur-3xl" />
@@ -56,6 +60,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+            <Link href="/bracket" className="nav-link">Bracket</Link>
             <Link href="/history" className="nav-link">History</Link>
             <Link href="/my-entries" className="nav-link">My Entries</Link>
             <ParticipantCount />
@@ -126,7 +131,24 @@ export default function Home() {
                 <strong className="text-chalk">Pick 8 teams:</strong> 1 must be a #1 seed, 3 must be seeded #2–#4, and 4 must be seeded #5 or lower.
               </div>
               <div className="accent-line">
-                <strong className="text-chalk">Scoring:</strong> 1 pt per win, +1–6 pts for advancing (Sweet 16 through Championship), +3 pts per underdog win (seed #9+), +1 pt per 10-pt margin.
+                <strong className="text-chalk">Scoring — every win earns points, and deeper runs earn more:</strong>
+                <div className="mt-2 space-y-1 text-xs text-white/50">
+                  <div className="grid grid-cols-2 gap-x-4">
+                    <span>Round of 64 win</span><span className="text-chalk font-bold">1 pt</span>
+                    <span>Round of 32 win</span><span className="text-chalk font-bold">2 pts</span>
+                    <span>Sweet 16 win</span><span className="text-chalk font-bold">3 pts</span>
+                    <span>Elite 8 win</span><span className="text-chalk font-bold">4 pts</span>
+                    <span>Final Four win</span><span className="text-chalk font-bold">5 pts</span>
+                    <span>Championship win</span><span className="text-chalk font-bold">6 pts</span>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
+                    <div><span className="text-emerald-400 font-bold">+3 pts</span> for every win by a #9 seed or lower <span className="text-white/30">(e.g. a #12 seed beating a #5 earns 1 + 3 = 4 pts)</span></div>
+                    <div><span className="text-maize-400 font-bold">+1 pt</span> per 10-point margin of victory <span className="text-white/30">(win by 23 = +2 pts · win by 31 = +3 pts)</span></div>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-white/10 text-white/40 italic">
+                    Example: your #11 seed wins by 15 in the Round of 64 → 1 pt (win) + 3 pts (underdog) + 1 pt (margin) = 5 pts total
+                  </div>
+                </div>
               </div>
               <div className="accent-line">
                 <strong className="text-chalk">Play-in teams:</strong> Pick the pair — you earn points for whichever makes it.
@@ -191,6 +213,7 @@ export default function Home() {
       <footer className="relative z-10 border-t border-white/10 px-6 py-6 mt-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-white/30 text-xs font-body">
           <span>© {YEAR} Bracketless Madness</span>
+<Tour />
           <Link href="/admin" className="hover:text-white/50 transition-colors">Admin</Link>
         </div>
       </footer>
