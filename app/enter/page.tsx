@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
+const ObfuscatedEmail = dynamic(() => import('@/components/ObfuscatedEmail'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { validateSelections } from '@/lib/scoring'
 import Countdown from '@/components/Countdown'
@@ -216,7 +218,7 @@ export default function EnterPage() {
             <div className="text-white/40 text-xs font-body">Your picks are private until tip-off. Use this PIN + your email to view them beforehand on the My Entries page.</div>
           </div>
           <p className="text-white/40 text-sm mb-8 font-body">
-            Don't forget to send your entry fee via Venmo or Zelle to matthcase@gmail.com
+            Don't forget to send your entry fee via Venmo or Zelle to <ObfuscatedEmail />
           </p>
           <div className="card p-5 mb-8 text-left">
             <h3 className="font-display text-xl text-maize-400 tracking-wider mb-3">YOUR PICKS</h3>
@@ -576,7 +578,7 @@ export default function EnterPage() {
               </button>
 
               <p className="text-white/30 text-xs font-body text-center">
-                After submitting, send your entry fee via Venmo/Zelle to matthcase@gmail.com
+                <>After submitting, send your entry fee via Venmo/Zelle to <ObfuscatedEmail /></>
               </p>
             </div>
           </div>

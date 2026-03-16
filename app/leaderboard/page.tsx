@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes, ROUND_NAMES } from '@/lib/scoring'
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })

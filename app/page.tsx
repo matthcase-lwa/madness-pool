@@ -9,6 +9,7 @@ const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false }
 const Tour = dynamic(() => import('@/components/Tour'), { ssr: false })
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
+const ObfuscatedEmail = dynamic(() => import('@/components/ObfuscatedEmail'), { ssr: false })
 
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
@@ -200,7 +201,7 @@ export default function Home() {
                 <strong className="text-chalk">Tiebreaker:</strong> Predict total points scored in the championship game. Closest wins; furthest wins last place.
               </div>
               <div className="accent-line">
-                <strong className="text-chalk">Payment:</strong> Entry fee via Venmo or Zelle to matthcase@gmail.com.
+                <strong className="text-chalk">Payment:</strong> Entry fee via Venmo or Zelle to <ObfuscatedEmail />.
               </div>
             </div>
           </div>
