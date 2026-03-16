@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 
 interface HistoricalEntry {
@@ -190,9 +191,12 @@ export default function HistoryPage() {
             🏀 March "Bracketless" Madness
           </Link>
           <div className="flex items-center gap-6">
-            <Link href="/enter" className="nav-link">Enter Pool</Link>
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/bracket" className="nav-link">Bracket</Link>
+            <Link href="/picks" className="nav-link">All Picks</Link>
+            <Link href="/history" className="nav-link">History</Link>
+            <NavCTA />
+            <ParticipantCount />
           </div>
         </div>
       </nav>

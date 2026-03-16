@@ -243,7 +243,9 @@ export default function MyEntriesPage() {
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/bracket" className="nav-link">Bracket</Link>
             <Link href="/picks" className="nav-link">All Picks</Link>
-            <Link href="/enter" className="nav-link">Enter Pool</Link>
+            <Link href="/history" className="nav-link">History</Link>
+            <NavCTA />
+            <ParticipantCount />
           </div>
         </div>
       </nav>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
@@ -134,10 +135,10 @@ export default function PicksPage() {
               🏀 March "Bracketless" Madness
             </Link>
             <div className="flex items-center gap-6">
-              <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
+                          <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/bracket" className="nav-link">Bracket</Link>
-              <Link href="/history" className="nav-link">History</Link>
-            <Link href="/my-entries" className="nav-link">My Entries</Link>
+            <Link href="/picks" className="nav-link">All Picks</Link>
+            <Link href="/history" className="nav-link">History</Link>
             </div>
           </div>
         </nav>

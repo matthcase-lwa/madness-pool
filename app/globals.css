@@ -12,8 +12,11 @@
     box-sizing: border-box;
   }
 
-  html {
+  html, body {
     scroll-behavior: smooth;
+    overflow-x: hidden;   /* prevent horizontal scroll only */
+    overflow-y: auto;     /* always allow vertical scroll */
+    height: auto;         /* never clip page height */
   }
 
   ::-webkit-scrollbar {

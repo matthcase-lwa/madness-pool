@@ -128,6 +128,7 @@ export default function EnterPage() {
       const { error: pickErr } = await supabase.from('picks').insert(picks)
       if (pickErr) throw new Error(pickErr.message)
 
+      sessionStorage.setItem('bracketless_entered', 'true')
       setStep('done')
     } catch (e: any) {
       setError(e.message || 'Something went wrong. Please try again.')
@@ -263,7 +264,9 @@ export default function EnterPage() {
           <div className="flex items-center gap-6">
             <Link href="/leaderboard" className="nav-link">Leaderboard</Link>
             <Link href="/bracket" className="nav-link">Bracket</Link>
+            <Link href="/picks" className="nav-link">All Picks</Link>
             <Link href="/history" className="nav-link">History</Link>
+            <NavCTA />
             <ParticipantCount />
           </div>
         </div>
