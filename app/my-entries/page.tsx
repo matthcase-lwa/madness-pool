@@ -30,6 +30,7 @@ interface Entry {
   rank: number
   teams_alive: number
   teams: Team[]
+  payment_received: boolean
 }
 
 const ROUND_NAMES: Record<number, string> = {
@@ -64,7 +65,7 @@ export default function MyEntriesPage() {
     // Find all participants with this email + PIN for this year
     const { data: participants } = await supabase
       .from('participants')
-      .select('id, nickname, full_name, tiebreaker, entry_pin')
+      .select('id, nickname, full_name, tiebreaker, entry_pin, payment_received')
       .eq('year', YEAR)
       .ilike('email', emailAddr.trim())
 
@@ -117,6 +118,7 @@ export default function MyEntriesPage() {
         rank: score?.rank ?? 0,
         teams_alive: score?.teams_alive ?? myPicks.filter(t => !t.eliminated_round).length,
         teams: myPicks,
+        payment_received: p.payment_received ?? false,
       }
     }).sort((a, b) => a.rank - b.rank || b.total_points - a.total_points)
 

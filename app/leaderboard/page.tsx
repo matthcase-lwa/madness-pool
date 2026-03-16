@@ -10,6 +10,7 @@ const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false }
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
+const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')
 
 interface ParticipantScore {
@@ -72,6 +73,7 @@ export default function LeaderboardPage() {
   }, [loadScores])
 
   async function loadPicks(participantId: string) {
+    if (new Date() < DEADLINE) return // Picks hidden until tip-off
     if (picks[participantId]) return
     const { data } = await supabase
       .from('picks')
@@ -247,7 +249,10 @@ export default function LeaderboardPage() {
                   {isExpanded && (
                     <div className="border-t border-white/10 px-4 py-4 bg-black/20">
                       {participantPicks.length === 0 ? (
-                        <div className="text-white/30 text-sm font-body text-center py-2">Loading picks...</div>
+                        {new Date() < DEADLINE
+                          ? <div className="text-white/40 text-sm font-body text-center py-3">🔒 Picks are hidden until tip-off</div>
+                          : <div className="text-white/30 text-sm font-body text-center py-2">Loading picks...</div>
+                        }
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {participantPicks.map(({ team }) => {

@@ -465,6 +465,21 @@ export default function AdminPage() {
     } else setMsg(`Error: ${error.message}`)
   }
 
+  async function deleteParticipant(participantId: string, nickname: string) {
+    if (!confirm(`Delete "${nickname}" and all their picks? This cannot be undone.`)) return
+    // picks cascade-delete automatically via FK constraint
+    const { error } = await supabase
+      .from('participants')
+      .delete()
+      .eq('id', participantId)
+    if (error) {
+      setMsg(`Error: ${error.message}`)
+    } else {
+      setMsg(`✓ Deleted ${nickname} and all their picks.`)
+      setParticipants(prev => prev.filter(p => p.id !== participantId))
+    }
+  }
+
   async function resetPin(participantId: string, nickname: string) {
     const newPin = prompt(`Reset PIN for ${nickname}. Enter new 4-digit PIN:`)
     if (!newPin) return
@@ -671,6 +686,13 @@ export default function AdminPage() {
                       title="Edit Picks"
                     >
                       ✏️ Picks
+                    </button>
+                    <button
+                      onClick={() => deleteParticipant(p.id, p.nickname)}
+                      className="px-3 py-1 rounded-full text-xs font-bold font-body bg-red-500/10 text-red-400/60 border border-red-500/20 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                      title="Delete entry"
+                    >
+                      🗑️
                     </button>
                   </div>
                 ))}
