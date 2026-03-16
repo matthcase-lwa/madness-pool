@@ -165,3 +165,22 @@ CREATE INDEX IF NOT EXISTS idx_participants_nickname ON participants(year, nickn
 -- Run this in Supabase SQL Editor if already deployed
 -- ============================================
 ALTER TABLE participants ADD COLUMN IF NOT EXISTS entry_pin TEXT;
+
+-- ============================================
+-- DEADLINE-ENFORCED PICKS VISIBILITY
+-- Run this in Supabase SQL Editor to prevent
+-- direct API queries from bypassing the deadline
+-- ============================================
+
+-- Drop the old open policy
+DROP POLICY IF EXISTS "Public read picks" ON picks;
+
+-- New policy: picks only readable after tip-off
+-- Replace the timestamp with your actual deadline
+CREATE POLICY "Public read picks after deadline" ON picks
+  FOR SELECT USING (
+    NOW() >= TIMESTAMPTZ '2026-03-19 16:15:00+00'
+  );
+
+-- Service role (used by admin) bypasses RLS automatically
+-- so admin can always read picks regardless of deadline

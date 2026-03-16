@@ -1,11 +1,12 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
-const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { ROUND_NAMES } from '@/lib/scoring'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 

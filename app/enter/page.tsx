@@ -1,13 +1,14 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
-const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
-const ObfuscatedEmail = dynamic(() => import('@/components/ObfuscatedEmail'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { validateSelections } from '@/lib/scoring'
 import Countdown from '@/components/Countdown'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
+const ObfuscatedEmail = dynamic(() => import('@/components/ObfuscatedEmail'), { ssr: false })
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 

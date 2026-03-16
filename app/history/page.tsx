@@ -1,11 +1,12 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { supabase } from '@/lib/supabase'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
-import { supabase } from '@/lib/supabase'
 
 interface HistoricalEntry {
   year: number

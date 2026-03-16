@@ -1,11 +1,12 @@
 'use client'
+
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
-const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes, ROUND_NAMES } from '@/lib/scoring'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
+const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
@@ -249,10 +250,9 @@ export default function LeaderboardPage() {
                   {isExpanded && (
                     <div className="border-t border-white/10 px-4 py-4 bg-black/20">
                       {participantPicks.length === 0 ? (
-                        {new Date() < DEADLINE
-                          ? <div className="text-white/40 text-sm font-body text-center py-3">🔒 Picks are hidden until tip-off</div>
+                        new Date() < DEADLINE
+                          ? <div className="text-white/40 text-sm font-body text-center py-3">🔒 Picks hidden until tip-off</div>
                           : <div className="text-white/30 text-sm font-body text-center py-2">Loading picks...</div>
-                        }
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {participantPicks.map(({ team }) => {
