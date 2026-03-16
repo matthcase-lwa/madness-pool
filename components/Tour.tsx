@@ -14,19 +14,19 @@ const STEPS = [
   {
     icon: '🎯',
     title: 'Pick Your 8 Teams',
-    body: 'You must pick exactly:\n• 1 team seeded #1\n• 3 teams seeded #2, #3, or #4\n• 4 teams seeded #5 or lower\n\nMix favorites with underdogs — a deep run by a #11 seed can be worth more than a first-round loss by a #1.',
+    body: 'You must pick exactly:\n• 1 team seeded #1\n• 3 teams seeded #2, #3, or #4\n• 4 teams seeded #5 or lower\n\nTip: picks seeded #9 or lower earn bonus points for every win — so bold underdog picks can pay off big if they go on a run.',
     cta: null,
   },
   {
     icon: '📊',
     title: 'How Points Work',
-    body: 'Every win earns points, and later rounds are worth more:\n\nR64: 1pt · R32: 2pts · S16: 3pts\nElite 8: 4pts · Final Four: 5pts · Champ: 6pts\n\n+3 bonus for any win by a #9 seed or lower\n+1 bonus per 10-pt margin of victory',
+    body: 'Every win earns points, and later rounds are worth more:\n\n1st Round: 1pt · 2nd Round: 2pts · Sweet 16: 3pts\nElite 8: 4pts · Final Four: 5pts · Champ: 6pts\n\n+3 bonus for any win by a #9 seed or lower\n+1 bonus per 10-pt margin of victory',
     cta: null,
   },
   {
     icon: '💰',
     title: 'Prizes & Tiebreaker',
-    body: 'Top finishers split the prize pool. In case of a tie, whoever predicted the closest total score for the championship game wins the tiebreaker — so don\'t skip it!\n\nLast place gets their entry fee back. 🐢',
+    body: 'The top finishers take home the prizes. If two or more people are tied at any prize position, the tiebreaker decides it — whoever predicted the closest total score for the championship game wins that spot.\n\nEveryone must submit a tiebreaker, so no one gets an unfair advantage. Last place gets their entry fee back. 🐢',
     cta: null,
   },
   {
