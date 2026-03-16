@@ -3,7 +3,9 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes } from '@/lib/scoring'
-import Countdown from '@/components/Countdown'
+const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false })
+import dynamic from 'next/dynamic'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
 

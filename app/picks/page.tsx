@@ -1,9 +1,10 @@
 'use client'
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import Countdown from '@/components/Countdown'
-import TeamBadge from '@/components/TeamBadge'
+const Countdown = dynamic(() => import('@/components/Countdown'), { ssr: false })
+const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')

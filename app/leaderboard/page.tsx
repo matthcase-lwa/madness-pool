@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import ParticipantCount from '@/components/ParticipantCount'
+import dynamic from 'next/dynamic'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { calculatePrizes, ROUND_NAMES } from '@/lib/scoring'
-import TeamBadge from '@/components/TeamBadge'
+const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const ENTRY_FEE = parseInt(process.env.NEXT_PUBLIC_ENTRY_FEE || '40')

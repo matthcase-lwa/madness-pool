@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ParticipantCount from '@/components/ParticipantCount'
+import dynamic from 'next/dynamic'
+const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 import { supabase } from '@/lib/supabase'
 import { ROUND_NAMES } from '@/lib/scoring'
 
