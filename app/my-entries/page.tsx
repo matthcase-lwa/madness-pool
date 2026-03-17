@@ -147,6 +147,23 @@ export default function MyEntriesPage() {
   }
 
   // ── Edit Picks modal ────────────────────────────────────────────────────────
+  // Load picks via secure API route (uses service role to bypass RLS deadline)
+  // PIN is verified server-side before picks are returned
+  async function loadPicksForEntry(participantId: string): Promise<Team[]> {
+    try {
+      const res = await fetch('/api/my-picks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participantId, pin, year: YEAR })
+      })
+      if (!res.ok) return []
+      const { teams } = await res.json()
+      return (teams || []).sort((a: Team, b: Team) => a.seed - b.seed)
+    } catch {
+      return []
+    }
+  }
+
   async function savePickChange(entryId: string, removeTeamId: string, addTeamId: string) {
     // Remove old pick
     const { error: delErr } = await supabase
@@ -505,7 +522,11 @@ export default function MyEntriesPage() {
                         </div>
                         {new Date() < DEADLINE && (
                           <button
-                            onClick={() => setEditingEntry(entry)}
+                            onClick={async () => {
+                              // Load fresh picks directly so RLS timing doesn't matter
+                              const freshTeams = await loadPicksForEntry(entry.id)
+                              setEditingEntry({ ...entry, teams: freshTeams })
+                            }}
                             className="btn-primary text-xs py-2 px-3"
                             title="Edit picks before tip-off"
                           >
