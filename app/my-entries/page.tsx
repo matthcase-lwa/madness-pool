@@ -147,6 +147,26 @@ export default function MyEntriesPage() {
   }
 
   // ── Edit Picks modal ────────────────────────────────────────────────────────
+  // Tiebreaker inline editing
+  const [editingTiebreaker, setEditingTiebreaker] = useState<string | null>(null) // entry id being edited
+  const [tiebreakerInput, setTiebreakerInput] = useState('')
+  const [savingTiebreaker, setSavingTiebreaker] = useState(false)
+
+  async function saveTiebreaker(entryId: string) {
+    const val = parseInt(tiebreakerInput)
+    if (!val || val < 1 || val > 300) return
+    setSavingTiebreaker(true)
+    const { error } = await supabase
+      .from('participants')
+      .update({ tiebreaker: val })
+      .eq('id', entryId)
+    if (!error) {
+      setEntries(prev => prev.map(e => e.id === entryId ? { ...e, tiebreaker: val } : e))
+      setEditingTiebreaker(null)
+    }
+    setSavingTiebreaker(false)
+  }
+
   // Load picks via secure API route (uses service role to bypass RLS deadline)
   // PIN is verified server-side before picks are returned
   async function loadPicksForEntry(participantId: string): Promise<Team[]> {
@@ -590,15 +610,59 @@ export default function MyEntriesPage() {
                       )}
                     </div>
 
-                    {/* Footer */}
-                    {entry.tiebreaker && (
-                      <div className="px-6 py-3 border-t border-white/10 flex items-center justify-between">
-                        <span className="text-white/30 text-xs font-body">Tiebreaker: {entry.tiebreaker} total pts in championship</span>
-                        <Link href={`/leaderboard`} className="text-maize-500 text-xs font-body hover:text-maize-400 transition-colors">
-                          Full leaderboard →
-                        </Link>
-                      </div>
-                    )}
+                    {/* Footer — tiebreaker (editable before tip-off) */}
+                    <div className="px-6 py-3 border-t border-white/10">
+                      {editingTiebreaker === entry.id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/40 text-xs font-body shrink-0">Championship total pts:</span>
+                          <input
+                            type="number"
+                            value={tiebreakerInput}
+                            onChange={e => setTiebreakerInput(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && saveTiebreaker(entry.id)}
+                            placeholder="e.g. 154"
+                            min={1} max={300}
+                            autoFocus
+                            className="w-24 bg-white/10 border border-maize-500/50 rounded px-2 py-1 text-chalk font-body text-sm focus:outline-none text-center"
+                          />
+                          <button
+                            onClick={() => saveTiebreaker(entry.id)}
+                            disabled={savingTiebreaker || !tiebreakerInput}
+                            className="btn-primary text-xs py-1 px-3"
+                          >
+                            {savingTiebreaker ? '...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => setEditingTiebreaker(null)}
+                            className="text-white/30 hover:text-white/60 text-xs font-body"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/30 text-xs font-body">
+                              Tiebreaker: <span className="text-chalk font-bold">{entry.tiebreaker ?? '—'}</span> total pts
+                            </span>
+                            {new Date() < DEADLINE && (
+                              <button
+                                onClick={() => {
+                                  setEditingTiebreaker(entry.id)
+                                  setTiebreakerInput(entry.tiebreaker?.toString() ?? '')
+                                }}
+                                className="text-maize-500/60 hover:text-maize-400 text-xs font-body transition-colors"
+                              >
+                                ✏️ Edit
+                              </button>
+                            )}
+                          </div>
+                          <Link href="/leaderboard" className="text-maize-500 text-xs font-body hover:text-maize-400 transition-colors">
+                            Full leaderboard →
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )
               })}
@@ -607,8 +671,8 @@ export default function MyEntriesPage() {
             {/* Submit another entry CTA */}
             <div className="card p-5 mt-8 flex items-center justify-between">
               <div>
-                <div className="font-body font-bold text-chalk">Want to enter again?</div>
-                <div className="text-white/40 text-sm font-body">Submit another set of 8 picks under a new nickname</div>
+                <div className="font-body font-bold text-chalk">Want to submit another entry?</div>
+                <div className="text-white/40 text-sm font-body">Use a different nickname — Matt1, Matt2, etc. Same email is fine.</div>
               </div>
               <Link href="/enter" className="btn-primary shrink-0">Submit Another Entry →</Link>
             </div>

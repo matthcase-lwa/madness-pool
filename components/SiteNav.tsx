@@ -32,9 +32,10 @@ export default function SiteNav() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-4 lg:gap-5">
           {NAV_LINKS.map(l => (
-            <Link key={l.href} href={l.href} className="nav-link">{l.label}</Link>
+            <Link key={l.href} href={l.href} className="nav-link">
+              {l.label}
+            </Link>
           ))}
-          {/* How to play — visible button, not just footer link */}
           <Tour />
           <NavCTA />
           <ParticipantCount />

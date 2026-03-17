@@ -87,7 +87,7 @@ export default function Home() {
         <div className="flex flex-wrap gap-3 mb-6">
           {entriesOpen ? (
             <Link href="/enter" className="btn-primary px-6 py-3 text-sm sm:text-base">
-              Submit Your Picks →
+              Submit Entries →
             </Link>
           ) : (
             <Link href="/picks" className="btn-primary px-6 py-3 text-sm sm:text-base">

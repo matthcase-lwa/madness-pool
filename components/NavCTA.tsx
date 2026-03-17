@@ -12,14 +12,11 @@ export default function NavCTA() {
   useEffect(() => {
     setPastDeadline(new Date() >= DEADLINE)
     setHasEntered(!!localStorage.getItem(ENTERED_KEY))
-
-    const interval = setInterval(() => {
-      setPastDeadline(new Date() >= DEADLINE)
-    }, 10000)
+    const interval = setInterval(() => setPastDeadline(new Date() >= DEADLINE), 10000)
     return () => clearInterval(interval)
   }, [])
 
-  // After tipoff — always show My Entries
+  // After tipoff — entries closed, show My Entries
   if (pastDeadline) {
     return (
       <Link href="/my-entries" className="btn-primary text-sm py-2 px-4">
@@ -28,23 +25,19 @@ export default function NavCTA() {
     )
   }
 
-  // Before tipoff — show My Entries if they've already submitted, Enter Pool if not
+  // Before tipoff — already submitted → My Entries
   if (hasEntered) {
     return (
-      <div className="flex items-center gap-2">
-        <Link href="/my-entries" className="btn-secondary text-sm py-2 px-4">
-          My Entries
-        </Link>
-        <Link href="/enter" className="btn-primary text-sm py-2 px-4">
-          Enter Pool
-        </Link>
-      </div>
+      <Link href="/my-entries" className="btn-primary text-sm py-2 px-4">
+        My Entries
+      </Link>
     )
   }
 
+  // Before tipoff — not yet submitted → Submit Entries
   return (
     <Link href="/enter" className="btn-primary text-sm py-2 px-4">
-      Enter Pool
+      Submit Entries
     </Link>
   )
 }
