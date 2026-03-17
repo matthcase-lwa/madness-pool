@@ -153,6 +153,7 @@ export default function MyEntriesPage() {
   const [savingTiebreaker, setSavingTiebreaker] = useState(false)
 
   async function saveTiebreaker(entryId: string) {
+    if (new Date() >= DEADLINE) return
     const val = parseInt(tiebreakerInput)
     if (!val || val < 1 || val > 300) return
     setSavingTiebreaker(true)
@@ -185,6 +186,7 @@ export default function MyEntriesPage() {
   }
 
   async function savePickChange(entryId: string, removeTeamId: string, addTeamId: string) {
+    if (new Date() >= DEADLINE) return { error: 'Entries are locked after tip-off.' }
     // Remove old pick
     const { error: delErr } = await supabase
       .from('picks')
