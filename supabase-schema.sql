@@ -184,3 +184,11 @@ CREATE POLICY "Public read picks after deadline" ON picks
 
 -- Service role (used by admin) bypasses RLS automatically
 -- so admin can always read picks regardless of deadline
+
+-- ============================================
+-- ADD DELETE POLICIES (missing from original schema)
+-- Run these in Supabase SQL Editor
+-- ============================================
+CREATE POLICY "Admin delete participants" ON participants FOR DELETE USING (true);
+CREATE POLICY "Admin delete picks" ON picks FOR DELETE USING (true);
+CREATE POLICY "Admin delete games" ON games FOR DELETE USING (true);

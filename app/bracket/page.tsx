@@ -336,75 +336,91 @@ export default function BracketPage() {
             </div>
           </div>
         ) : (
-          // Full bracket view
+          // Full bracket view — 2×2 layout
+          // Top row: East (left→) meets South (←right) → Top Final Four slot
+          // Bottom row: Midwest (left→) meets West (←right) → Bottom Final Four slot
+          // Top FF winner meets Bottom FF winner → Championship
           <div className="overflow-x-auto pb-8">
             <div className="inline-block min-w-max">
-              {/* Region labels */}
-              <div className="flex gap-4 mb-3 justify-center">
-                {(['East', 'South', 'Midwest', 'West'] as const).map(r => (
-                  <div key={r} className={`text-xs font-display tracking-widest px-3 py-1 rounded border ${REGION_COLORS[r]} flex-1 text-center`}>
-                    {r.toUpperCase()}
-                  </div>
-                ))}
-              </div>
 
-              {/* Main bracket layout */}
-              <div className="flex gap-3 items-center">
-                {/* LEFT SIDE — East + South */}
-                <div className="flex gap-3">
-                  {/* East */}
+              {/* ── TOP HALF: East vs South ─────────────────────────────── */}
+              <div className="flex items-center gap-0 mb-1">
+                {/* East — reads left to right, R1 outermost */}
+                <div className="flex gap-2 items-center">
                   <div>
                     <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['East'].split(' ')[0]}`}>EAST</div>
                     <RegionBracket region="East" games={eastGames} liveData={liveData} />
                   </div>
+                </div>
 
-                  {/* South */}
+                {/* Arrow label between East and South */}
+                <div className="flex flex-col items-center px-3 shrink-0 self-center">
+                  <div className="text-white/20 text-xs font-body mb-1 whitespace-nowrap">winner plays →</div>
+                  <div className="text-maize-500/40 text-lg">⟶</div>
+                </div>
+
+                {/* South — reads right to left (flipped), R1 outermost */}
+                <div className="flex gap-2 items-center">
                   <div>
                     <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['South'].split(' ')[0]}`}>SOUTH</div>
-                    <RegionBracket region="South" games={southGames} liveData={liveData} />
+                    <RegionBracket region="South" games={southGames} liveData={liveData} flip />
                   </div>
                 </div>
 
-                {/* CENTER — Final Four + Championship */}
-                <div className="flex flex-col items-center gap-4 px-4 shrink-0">
-                  <div className="text-xs font-display tracking-widest text-purple-400 mb-2">FINAL FOUR</div>
+                {/* Final Four slot 1 — East winner vs South winner */}
+                <div className="flex flex-col items-center px-4 shrink-0 self-center">
+                  <div className="text-xs font-display tracking-widest text-purple-400 mb-2 text-center whitespace-nowrap">FINAL FOUR</div>
+                  <div className="text-white/20 text-xs font-body mb-2 text-center">East vs South</div>
+                  {ff1 && <GameCard game={ff1} liveData={liveData['FF1']} />}
+                </div>
+              </div>
 
-                  {ff1 && (
-                    <GameCard game={ff1} liveData={liveData['FF1']} />
-                  )}
-
-                  <div className="my-2">
-                    {champ && (
-                      <div>
-                        <div className="text-xs font-display tracking-widest text-yellow-400 text-center mb-2">CHAMPION</div>
-                        <GameCard game={champ} liveData={liveData['CHAMP']} />
-                      </div>
-                    )}
+              {/* ── CHAMPIONSHIP (center column) ────────────────────────── */}
+              <div className="flex justify-center my-4">
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-px w-16 bg-purple-500/30" />
+                    <div className="text-xs font-display tracking-widest text-yellow-400 whitespace-nowrap">🏆 CHAMPIONSHIP</div>
+                    <div className="h-px w-16 bg-purple-500/30" />
                   </div>
+                  {champ && <GameCard game={champ} liveData={liveData['CHAMP']} />}
+                </div>
+              </div>
 
-                  {ff2 && (
-                    <GameCard game={ff2} liveData={liveData['FF2']} />
-                  )}
+              {/* ── BOTTOM HALF: Midwest vs West ────────────────────────── */}
+              <div className="flex items-center gap-0 mt-1">
+                {/* Midwest — reads left to right */}
+                <div className="flex gap-2 items-center">
+                  <div>
+                    <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['Midwest'].split(' ')[0]}`}>MIDWEST</div>
+                    <RegionBracket region="Midwest" games={midwestGames} liveData={liveData} />
+                  </div>
                 </div>
 
-                {/* RIGHT SIDE — West (inner, closest to center) + Midwest (outer) */}
-                <div className="flex gap-3 flex-row-reverse">
-                  {/* Midwest — renders on far right due to flex-row-reverse */}
+                {/* Arrow label */}
+                <div className="flex flex-col items-center px-3 shrink-0 self-center">
+                  <div className="text-white/20 text-xs font-body mb-1 whitespace-nowrap">winner plays →</div>
+                  <div className="text-maize-500/40 text-lg">⟶</div>
+                </div>
+
+                {/* West — reads right to left (flipped) */}
+                <div className="flex gap-2 items-center">
                   <div>
                     <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['West'].split(' ')[0]}`}>WEST</div>
                     <RegionBracket region="West" games={westGames} liveData={liveData} flip />
                   </div>
+                </div>
 
-                  {/* West — renders closer to center due to flex-row-reverse */}
-                  <div>
-                    <div className={`text-xs font-display tracking-widest mb-2 text-center ${REGION_COLORS['Midwest'].split(' ')[0]}`}>MIDWEST</div>
-                    <RegionBracket region="Midwest" games={midwestGames} liveData={liveData} flip />
-                  </div>
+                {/* Final Four slot 2 — Midwest winner vs West winner */}
+                <div className="flex flex-col items-center px-4 shrink-0 self-center">
+                  <div className="text-xs font-display tracking-widest text-purple-400 mb-2 text-center whitespace-nowrap">FINAL FOUR</div>
+                  <div className="text-white/20 text-xs font-body mb-2 text-center">Midwest vs West</div>
+                  {ff2 && <GameCard game={ff2} liveData={liveData['FF2']} />}
                 </div>
               </div>
 
               {/* Legend */}
-              <div className="flex items-center gap-6 mt-6 justify-center text-xs font-body text-white/30">
+              <div className="flex items-center gap-6 mt-8 justify-center text-xs font-body text-white/30">
                 <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Live game</div>
                 <div className="flex items-center gap-1.5"><span className="w-3 h-3 bg-maize-500/20 rounded border border-maize-500/30 block" /> Winner / Advancing</div>
                 <div className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold text-sm">#9+</span> Underdog bonus eligible</div>

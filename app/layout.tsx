@@ -16,6 +16,11 @@ const body = DM_Sans({
 export const metadata: Metadata = {
   title: 'Bracketless Madness',
   description: 'The annual Bracketless Madness pool — pick 8 teams, survive the chaos',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
