@@ -45,6 +45,8 @@ export default function MyEntriesPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [printEntry, setPrintEntry] = useState<Entry | null>(null)
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null)
+  const [allTeams, setAllTeams] = useState<Team[]>([])
 
   // Restore email from session
   useEffect(() => {
@@ -125,6 +127,14 @@ export default function MyEntriesPage() {
     setEntries(built)
     setSubmitted(true)
     setLoading(false)
+
+    // Load all available teams for the edit modal
+    const { data: teams } = await supabase
+      .from('teams')
+      .select('id, name, seed, region')
+      .eq('year', YEAR)
+      .order('seed')
+    if (teams) setAllTeams(teams as Team[])
     sessionStorage.setItem('my_entries_email', emailAddr.trim())
     sessionStorage.setItem('my_entries_pin', pin.trim())
   }, [])
@@ -134,6 +144,27 @@ export default function MyEntriesPage() {
     const pastDeadline = new Date() >= DEADLINE
     if (!pastDeadline && pin.length !== 4) return
     loadEntries(email, pin)
+  }
+
+  // ── Edit Picks modal ────────────────────────────────────────────────────────
+  async function savePickChange(entryId: string, removeTeamId: string, addTeamId: string) {
+    // Remove old pick
+    const { error: delErr } = await supabase
+      .from('picks')
+      .delete()
+      .eq('participant_id', entryId)
+      .eq('team_id', removeTeamId)
+    if (delErr) return { error: delErr.message }
+
+    // Add new pick
+    const { error: insErr } = await supabase
+      .from('picks')
+      .insert({ participant_id: entryId, team_id: addTeamId, year: YEAR })
+    if (insErr) return { error: insErr.message }
+
+    // Refresh entries
+    await loadEntries(email, pin)
+    return { error: null }
   }
 
   // ── Print view ──────────────────────────────────────────────────────────────
@@ -236,6 +267,127 @@ export default function MyEntriesPage() {
     )
   }
 
+  // ── Edit Picks Modal ────────────────────────────────────────────────────────
+  function EditPicksModal({ entry }: { entry: Entry }) {
+    const [swapping, setSwapping] = useState<string | null>(null) // team id being swapped out
+    const [replacementId, setReplacementId] = useState('')
+    const [saving, setSaving] = useState(false)
+    const [localError, setLocalError] = useState('')
+
+    // Seed rules: must have 1×#1, 3×#2-4, 4×#5+
+    function getSeedGroup(seed: number) {
+      if (seed === 1) return '1'
+      if (seed <= 4) return '2-4'
+      return '5+'
+    }
+
+    function getEligibleReplacements(removingSeed: number) {
+      const group = getSeedGroup(removingSeed)
+      const currentIds = new Set(entry.teams.map(t => t.id))
+      return allTeams.filter(t => {
+        if (currentIds.has(t.id)) return false // already picked
+        return getSeedGroup(t.seed) === group // same seed group
+      })
+    }
+
+    async function handleSwap(removeTeamId: string) {
+      if (!replacementId) return
+      setSaving(true)
+      setLocalError('')
+      const { error } = await savePickChange(entry.id, removeTeamId, replacementId)
+      if (error) {
+        setLocalError(error)
+      } else {
+        setSwapping(null)
+        setReplacementId('')
+        setEditingEntry(null) // close modal — entries reloaded by savePickChange
+      }
+      setSaving(false)
+    }
+
+    const removingTeam = entry.teams.find(t => t.id === swapping)
+    const eligible = swapping ? getEligibleReplacements(removingTeam!.seed) : []
+
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="card max-w-lg w-full p-0 overflow-hidden border-maize-500/40">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-maize-500/10">
+            <div>
+              <h2 className="font-display text-2xl text-chalk tracking-wider">EDIT PICKS</h2>
+              <p className="text-white/50 text-sm font-body">{entry.nickname} · closes at tip-off</p>
+            </div>
+            <button onClick={() => setEditingEntry(null)} className="text-white/30 hover:text-white/70 text-2xl">✕</button>
+          </div>
+
+          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-3">
+            <p className="text-white/40 text-xs font-body">
+              Click <strong className="text-white/60">Swap</strong> next to any team to replace it with another from the same seed group. Seed rules still apply.
+            </p>
+
+            {entry.teams.map(team => (
+              <div key={team.id} className={`rounded-lg border overflow-hidden ${swapping === team.id ? 'border-maize-500/50 bg-maize-500/5' : 'border-white/10 bg-white/5'}`}>
+                {/* Team row */}
+                <div className="flex items-center justify-between px-4 py-3">
+                  <TeamBadge name={team.name} seed={team.seed} showRecord={true} size="sm" />
+                  {swapping === team.id ? (
+                    <button
+                      onClick={() => { setSwapping(null); setReplacementId('') }}
+                      className="text-white/40 hover:text-white/70 text-xs font-body shrink-0 ml-2"
+                    >
+                      Cancel
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { setSwapping(team.id); setReplacementId('') }}
+                      disabled={saving}
+                      className="px-3 py-1 rounded-full text-xs font-bold font-body bg-white/10 text-white/50 hover:bg-maize-500/20 hover:text-maize-400 transition-all shrink-0 ml-2"
+                    >
+                      Swap
+                    </button>
+                  )}
+                </div>
+
+                {/* Replacement selector — shown when this team is being swapped */}
+                {swapping === team.id && (
+                  <div className="px-4 pb-4 border-t border-white/10 pt-3 space-y-3">
+                    <p className="text-white/40 text-xs font-body">
+                      Replace with a #{team.seed <= 1 ? '1' : team.seed <= 4 ? '2–4' : '5+'} seed:
+                    </p>
+                    <select
+                      value={replacementId}
+                      onChange={e => { setReplacementId(e.target.value); setLocalError('') }}
+                      className="w-full bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500"
+                    >
+                      <option value="">Choose a replacement team...</option>
+                      {eligible.map(t => (
+                        <option key={t.id} value={t.id}>
+                          #{t.seed} {t.name} ({t.region})
+                        </option>
+                      ))}
+                    </select>
+                    {localError && <p className="text-red-400 text-xs font-body">{localError}</p>}
+                    <button
+                      onClick={() => handleSwap(team.id)}
+                      disabled={!replacementId || saving}
+                      className={`w-full py-2 rounded-lg font-bold font-body text-sm transition-all ${replacementId && !saving ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+                    >
+                      {saving ? 'Saving...' : `Swap ${team.name} → selected team`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="px-6 py-4 border-t border-white/10">
+            <p className="text-white/20 text-xs font-body">Changes save instantly. You can make as many swaps as you like before tip-off.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // ── Main page ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-hardwood court-texture">
@@ -247,7 +399,12 @@ export default function MyEntriesPage() {
           <p className="text-white/40 font-body mt-2">Before tip-off, use your PIN to keep your picks private. After tip-off, everyone can see all picks openly.</p>
         </div>
 
-        {/* Email lookup */}
+        {/* Edit Picks modal */}
+      {editingEntry && new Date() < DEADLINE && (
+        <EditPicksModal entry={editingEntry} />
+      )}
+
+      {/* Email lookup */}
         {(!submitted || entries.length === 0) && (
           <div className="card p-6 mb-8 max-w-md">
             <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">FIND YOUR ENTRIES</h2>
@@ -346,6 +503,15 @@ export default function MyEntriesPage() {
                           <div className="font-display text-2xl text-white/60 tracking-wider">{entry.teams_alive}</div>
                           <div className="text-white/30 text-xs font-body">alive</div>
                         </div>
+                        {new Date() < DEADLINE && (
+                          <button
+                            onClick={() => setEditingEntry(entry)}
+                            className="btn-primary text-xs py-2 px-3"
+                            title="Edit picks before tip-off"
+                          >
+                            ✏️ Edit Picks
+                          </button>
+                        )}
                         <button
                           onClick={() => setPrintEntry(entry)}
                           className="btn-secondary text-xs py-2 px-3"
