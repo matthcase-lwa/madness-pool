@@ -47,7 +47,7 @@ export default function EnterPage() {
   const [showScoring, setShowScoring] = useState(false)
 
   useEffect(() => {
-    if (sessionStorage.getItem(PASS_KEY) === 'true') setUnlocked(true)
+    if (sessionStorage.getItem(PASS_KEY) === 'true' || localStorage.getItem(PASS_KEY) === 'true') setUnlocked(true)
   }, [])
 
   useEffect(() => {
@@ -133,6 +133,7 @@ export default function EnterPage() {
       if (pickErr) throw new Error(pickErr.message)
 
       sessionStorage.setItem('bracketless_entered', 'true')
+      localStorage.setItem('bracketless_entered', 'true')
       setStep('done')
     } catch (e: any) {
       setError(e.message || 'Something went wrong. Please try again.')
@@ -148,6 +149,7 @@ export default function EnterPage() {
   function handlePasswordSubmit() {
     if (passwordInput.toLowerCase().trim() === POOL_PASSWORD) {
       sessionStorage.setItem(PASS_KEY, 'true')
+      localStorage.setItem(PASS_KEY, 'true')
       setUnlocked(true)
     } else {
       setPasswordError('Wrong password. Ask Matt for the password!')
@@ -161,7 +163,7 @@ export default function EnterPage() {
         <div className="card max-w-sm w-full p-8 text-center">
           <div className="text-6xl mb-4">🏀</div>
           <h1 className="font-display text-4xl text-chalk tracking-wider mb-2">ENTER THE POOL</h1>
-          <p className="text-white/40 font-body text-sm mb-8">You need the password to participate. Ask Matt if you don't have it!</p>
+          <p className="text-white/40 font-body text-sm mb-6">You need the password to participate. Ask Matt if you don't have it!</p>
           <input
             type="password"
             value={passwordInput}
@@ -175,10 +177,22 @@ export default function EnterPage() {
           )}
           <button
             onClick={handlePasswordSubmit}
-            className="btn-primary w-full text-lg py-3"
+            className="btn-primary w-full text-lg py-3 mb-4"
           >
             Enter Pool →
           </button>
+
+          {/* Returning visitor path */}
+          <div className="border-t border-white/10 pt-4 mt-2">
+            <p className="text-white/30 text-xs font-body mb-3">Already submitted picks?</p>
+            <Link
+              href="/my-entries"
+              className="block w-full py-2.5 rounded-lg font-bold font-body text-sm bg-white/10 text-white/60 hover:bg-white/20 hover:text-chalk transition-all"
+            >
+              View / Edit My Entries →
+            </Link>
+          </div>
+
           <Link href="/" className="block mt-4 text-white/30 text-xs font-body hover:text-white/50 transition-colors">
             ← Back to home
           </Link>

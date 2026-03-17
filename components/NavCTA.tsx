@@ -11,7 +11,7 @@ export default function NavCTA() {
 
   useEffect(() => {
     setPastDeadline(new Date() >= DEADLINE)
-    setHasEntered(!!sessionStorage.getItem(ENTERED_KEY))
+    setHasEntered(!!localStorage.getItem(ENTERED_KEY))
 
     const interval = setInterval(() => {
       setPastDeadline(new Date() >= DEADLINE)
