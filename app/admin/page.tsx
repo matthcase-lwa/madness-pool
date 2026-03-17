@@ -391,7 +391,12 @@ export default function AdminPage() {
   const [importJson, setImportJson] = useState('')
 
   useEffect(() => {
-    if (sessionStorage.getItem(ADMIN_KEY) === 'true') setAuthed(true)
+    // Always resolve to true or false — null causes blank page
+    if (sessionStorage.getItem(ADMIN_KEY) === 'true') {
+      setAuthed(true)
+    } else {
+      setAuthed(false)
+    }
   }, [])
 
   useEffect(() => {
