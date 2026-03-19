@@ -74,7 +74,7 @@ function EmailExport({ year }: { year: number }) {
   )
 }
 
-function ExportPicks({ year }: { year: number }) {
+function ExportPicks({ year, adminPassword }: { year: number; adminPassword: string }) {
   const [loading, setLoading] = useState(false)
   const [count, setCount] = useState<number | null>(null)
 
@@ -85,7 +85,7 @@ function ExportPicks({ year }: { year: number }) {
       const res = await fetch('/api/admin-export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: password, year })
+        body: JSON.stringify({ password: adminPassword, year })
       })
       const result = await res.json()
       if (!res.ok || result.error) {
@@ -1327,7 +1327,7 @@ export default function AdminPage() {
               <p className="text-white/30 text-xs font-body mb-6">
                 The CSV includes: nickname, full name, email, tiebreaker, PIN, payment status, and all 8 team selections.
               </p>
-              <ExportPicks year={YEAR} />
+              <ExportPicks year={YEAR} adminPassword={password} />
             </div>
           </div>
         )}
