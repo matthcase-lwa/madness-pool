@@ -160,7 +160,7 @@ export default function EnterPage() {
   if (!unlocked) {
     return (
       <div className="min-h-screen bg-hardwood court-texture flex items-center justify-center p-6">
-        <div className="card max-w-sm w-full p-8 text-center">
+        <div className="card max-w-sm w-full p-5 sm:p-8 text-center">
           <div className="text-6xl mb-4">🏀</div>
           <h1 className="font-display text-4xl text-chalk tracking-wider mb-2">SUBMIT YOUR ENTRIES</h1>
           <p className="text-white/40 font-body text-sm mb-6">You need the password to participate. Ask Matt if you don't have it!</p>
@@ -276,7 +276,7 @@ export default function EnterPage() {
       {/* Nav */}
       <SiteNav />
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
         <div className="mb-8">
           <h1 className="font-display text-6xl text-chalk tracking-wider mb-2">SUBMIT YOUR PICKS</h1>
           <p className="text-white/50 font-body">Select 8 teams following the seed rules below.</p>
@@ -362,7 +362,7 @@ export default function EnterPage() {
                   {byRegion.map(({ region, teams: rTeams }) => (
                     <div key={region}>
                       <h3 className="font-display text-xl text-maize-500/70 tracking-widest mb-3">{region.toUpperCase()}</h3>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {rTeams.map(team => {
                           const isSelected = selected.includes(team.id)
                           const canSelect = selected.length < 8 || isSelected
@@ -392,7 +392,7 @@ export default function EnterPage() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {filteredTeams.map(team => {
                     const isSelected = selected.includes(team.id)
                     const canSelect = selected.length < 8 || isSelected

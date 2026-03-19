@@ -349,8 +349,8 @@ export default function MyEntriesPage() {
     const eligible = swapping ? getEligibleReplacements(removingTeam!.seed) : []
 
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="card max-w-lg w-full p-0 overflow-hidden border-maize-500/40">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="card w-full sm:max-w-lg p-0 overflow-hidden border-maize-500/40 rounded-b-none sm:rounded-b-xl">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-maize-500/10">
             <div>
@@ -360,7 +360,7 @@ export default function MyEntriesPage() {
             <button onClick={() => setEditingEntry(null)} className="text-white/30 hover:text-white/70 text-2xl">✕</button>
           </div>
 
-          <div className="p-6 max-h-[70vh] overflow-y-auto space-y-3">
+          <div className="p-4 sm:p-6 max-h-[75vh] sm:max-h-[70vh] overflow-y-auto space-y-3">
             <p className="text-white/40 text-xs font-body">
               Click <strong className="text-white/60">Swap</strong> next to any team to replace it with another from the same seed group. Seed rules still apply.
             </p>
@@ -433,7 +433,7 @@ export default function MyEntriesPage() {
     <div className="min-h-screen bg-hardwood court-texture">
       <SiteNav />
 
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
         <div className="mb-8">
           <h1 className="font-display text-6xl text-chalk tracking-wider">MY ENTRIES</h1>
           <p className="text-white/40 font-body mt-2">Before tip-off, use your PIN to keep your picks private. After tip-off, everyone can see all picks openly.</p>
@@ -446,7 +446,7 @@ export default function MyEntriesPage() {
 
       {/* Email lookup */}
         {(!submitted || entries.length === 0) && (
-          <div className="card p-6 mb-8 max-w-md">
+          <div className="card p-4 sm:p-6 mb-8 w-full max-w-md">
             <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">FIND YOUR ENTRIES</h2>
             <p className="text-white/50 font-body text-sm mb-4">
               Enter the email you used when submitting your picks.
@@ -488,13 +488,13 @@ export default function MyEntriesPage() {
         {/* Results */}
         {submitted && entries.length > 0 && (
           <>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
               <div>
                 <p className="text-white/50 font-body text-sm">
                   Showing <strong className="text-chalk">{entries.length}</strong> {entries.length === 1 ? 'entry' : 'entries'} for <strong className="text-maize-400">{email}</strong>
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button
                   onClick={() => { setSubmitted(false); setEntries([]); setError(''); setPin('') }}
                   className="btn-secondary text-sm py-2 px-4"
@@ -518,7 +518,7 @@ export default function MyEntriesPage() {
                 return (
                   <div key={entry.id} className={`card overflow-hidden ${idx === 0 && entry.rank > 0 ? 'border-maize-500/30' : ''}`}>
                     {/* Entry header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-4 border-b border-white/10 gap-3">
                       <div className="flex items-center gap-4">
                         {entry.rank > 0 && (
                           <div className={`font-display text-3xl tracking-wider ${
@@ -534,7 +534,7 @@ export default function MyEntriesPage() {
                           {entry.full_name && <div className="text-white/30 text-xs font-body">{entry.full_name}</div>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-4 sm:gap-6">
                         <div className="text-center">
                           <div className="font-display text-4xl text-maize-400 tracking-wider">{entry.total_points}</div>
                           <div className="text-white/30 text-xs font-body">pts</div>
@@ -558,7 +558,7 @@ export default function MyEntriesPage() {
                         )}
                         <button
                           onClick={() => setPrintEntry(entry)}
-                          className="btn-secondary text-xs py-2 px-3"
+                          className="btn-secondary text-xs py-2 px-3 hidden sm:inline-flex"
                           title="Print this entry"
                         >
                           🖨️ Print
@@ -567,7 +567,7 @@ export default function MyEntriesPage() {
                     </div>
 
                     {/* Teams */}
-                    <div className="px-6 py-5">
+                    <div className="px-3 sm:px-6 py-4 sm:py-5">
                       {/* Still alive */}
                       {alive.length > 0 && (
                         <div className="mb-4">
@@ -577,7 +577,7 @@ export default function MyEntriesPage() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {alive.map(team => (
-                              <div key={team.id} className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-2.5">
+                              <div key={team.id} className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 sm:px-4 py-2.5 gap-2">
                                 <TeamBadge name={team.name} seed={team.seed} showRecord={true} size="sm" />
                                 <span className="text-emerald-400 text-xs font-body shrink-0 ml-2">
                                   {team.seed >= 9 ? '+3 bonus ●' : '●'}
@@ -596,7 +596,7 @@ export default function MyEntriesPage() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {eliminated.map(team => (
-                              <div key={team.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 opacity-50">
+                              <div key={team.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 opacity-50 gap-2">
                                 <TeamBadge name={team.name} seed={team.seed} showRecord={false} size="sm" eliminated />
                                 <span className="text-red-400 text-xs font-body shrink-0 ml-2">
                                   Out {ROUND_NAMES[team.eliminated_round!]}
@@ -616,8 +616,8 @@ export default function MyEntriesPage() {
                     {/* Footer — tiebreaker (editable before tip-off) */}
                     <div className="px-6 py-3 border-t border-white/10">
                       {editingTiebreaker === entry.id ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-white/40 text-xs font-body shrink-0">Championship total pts:</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-white/40 text-xs font-body shrink-0">Championship pts:</span>
                           <input
                             type="number"
                             value={tiebreakerInput}
@@ -643,7 +643,7 @@ export default function MyEntriesPage() {
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <span className="text-white/30 text-xs font-body">
                               Tiebreaker: <span className="text-chalk font-bold">{entry.tiebreaker ?? '—'}</span> total pts

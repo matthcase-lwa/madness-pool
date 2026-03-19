@@ -696,7 +696,9 @@ export default function AdminPage() {
   useEffect(() => {
     // Always resolve to true or false — null causes blank page
     if (sessionStorage.getItem(ADMIN_KEY) === 'true') {
-      _adminPasswordCache = sessionStorage.getItem('madness_admin_pw') || ''
+      const savedPw = sessionStorage.getItem('madness_admin_pw') || ''
+      _adminPasswordCache = savedPw
+      setPassword(savedPw)  // restore password state so props work after refresh
       setAuthed(true)
     } else {
       setAuthed(false)

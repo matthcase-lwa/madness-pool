@@ -116,7 +116,7 @@ export default function LeaderboardPage() {
     <div className="min-h-screen bg-hardwood court-texture">
       <SiteNav />
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
@@ -199,10 +199,10 @@ export default function LeaderboardPage() {
                   {/* Main row */}
                   <button
                     onClick={() => toggleExpand(participant.participant_id)}
-                    className="w-full flex items-center gap-4 p-4 text-left hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center gap-2 sm:gap-4 p-3 sm:p-4 text-left hover:bg-white/5 transition-colors"
                   >
                     {/* Rank */}
-                    <div className={`font-display text-3xl tracking-wider w-12 shrink-0 ${medalColors[participant.rank] || 'text-white/30'}`}>
+                    <div className={`font-display text-xl sm:text-3xl tracking-wider w-8 sm:w-12 shrink-0 ${medalColors[participant.rank] || 'text-white/30'}`}>
                       {participant.rank <= 3 ? ['🥇', '🥈', '🥉'][participant.rank - 1] : `#${participant.rank}`}
                     </div>
 
@@ -236,7 +236,7 @@ export default function LeaderboardPage() {
 
                     {/* Score */}
                     <div className="text-right shrink-0">
-                      <div className={`font-display text-4xl tracking-wider ${participant.rank === 1 ? 'text-maize-400' : 'text-chalk'}`}>
+                      <div className={`font-display text-2xl sm:text-4xl tracking-wider ${participant.rank === 1 ? 'text-maize-400' : 'text-chalk'}`}>
                         {participant.total_points}
                       </div>
                       <div className="text-white/30 text-xs font-body">pts</div>
@@ -254,7 +254,7 @@ export default function LeaderboardPage() {
                           ? <div className="text-white/40 text-sm font-body text-center py-3">🔒 Picks hidden until tip-off</div>
                           : <div className="text-white/30 text-sm font-body text-center py-2">Loading picks...</div>
                       ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
                           {participantPicks.map(({ team }) => {
                             if (!team) return null
                             const alive = team.eliminated_round === null
