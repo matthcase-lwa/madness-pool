@@ -143,24 +143,6 @@ export default function MyEntriesPage() {
       .eq('year', YEAR)
       .order('seed')
     if (teams) setAllTeams(teams as Team[])
-
-    // Load games for points-by-round breakdown
-    const { data: gamesData } = await supabase
-      .from('games')
-      .select('id, round, winner_team_id, loser_team_id, winner_score, loser_score, margin')
-      .eq('year', YEAR)
-    if (gamesData) setGames(gamesData)
-
-    // Load leaderboard top score for gap calculation
-    const { data: topScore } = await supabase
-      .from('participant_scores')
-      .select('total_points, nickname')
-      .eq('year', YEAR)
-      .order('rank')
-      .limit(1)
-      .single()
-    if (topScore) setLeader(topScore)
-
     sessionStorage.setItem('my_entries_email', emailAddr.trim())
     sessionStorage.setItem('my_entries_pin', pin.trim())
   }, [])
@@ -171,9 +153,6 @@ export default function MyEntriesPage() {
     if (!pastDeadline && pin.length !== 4) return
     loadEntries(email, pin)
   }
-
-  const [games, setGames] = useState<any[]>([])
-  const [leader, setLeader] = useState<{total_points: number; nickname: string} | null>(null)
 
   // ── Edit Picks modal ────────────────────────────────────────────────────────
   // Tiebreaker inline editing
@@ -507,7 +486,7 @@ export default function MyEntriesPage() {
             <button
               onClick={handleLookup}
               disabled={!email.trim() || (new Date() < DEADLINE && pin.length !== 4) || loading}
-              className={email.trim() && (new Date() >= DEADLINE || pin.length === 4) ? 'w-full py-3 rounded-lg font-bold font-body transition-all btn-primary' : 'w-full py-3 rounded-lg font-bold font-body transition-all bg-white/10 text-white/30 cursor-not-allowed'}
+              className={`w-full py-3 rounded-lg font-bold font-body transition-all ${email.trim() && (new Date() >= DEADLINE || pin.length === 4) ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
             >
               {loading ? 'Looking up...' : 'View My Entries →'}
             </button>
@@ -595,92 +574,24 @@ export default function MyEntriesPage() {
                       </div>
                     </div>
 
-                    {/* Teams — rich breakdown with points */}
+                    {/* Teams */}
                     <div className="px-3 sm:px-6 py-4 sm:py-5">
-
-                      {/* Fun stats row — only after tip-off when games exist */}
-                      {new Date() >= DEADLINE && games.length > 0 && entry.total_points > 0 && (() => {
-                        const gapToLeader = leader && leader.nickname !== entry.nickname ? leader.total_points - entry.total_points : 0
-                        const bestTeam = entry.teams
-                          .map(t => {
-                            const wins = games.filter(g => g.winner_team_id === t.id)
-                            const pts = wins.reduce((s, g) => s + (g.round ?? 0) + (t.seed >= 9 ? 3 : 0) + Math.floor((g.margin ?? 0) / 10), 0)
-                            return { ...t, pts }
-                          })
-                          .sort((a, b) => b.pts - a.pts)[0]
-                        return (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-                            <div className="bg-maize-500/10 border border-maize-500/20 rounded-lg p-3 text-center">
-                              <div className="font-display text-2xl text-maize-400">{entry.rank > 0 ? `#${entry.rank}` : '—'}</div>
-                              <div className="text-white/40 text-xs font-body mt-0.5">your rank</div>
-                            </div>
-                            {gapToLeader > 0 ? (
-                              <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-center">
-                                <div className="font-display text-2xl text-white/60">{gapToLeader}</div>
-                                <div className="text-white/40 text-xs font-body mt-0.5">pts from lead</div>
-                              </div>
-                            ) : (
-                              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-center">
-                                <div className="font-display text-2xl text-emerald-400">🏆</div>
-                                <div className="text-white/40 text-xs font-body mt-0.5">you're leading!</div>
-                              </div>
-                            )}
-                            {bestTeam && bestTeam.pts > 0 && (
-                              <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-center col-span-2 sm:col-span-1">
-                                <div className="font-body font-bold text-chalk text-sm truncate">{bestTeam.name}</div>
-                                <div className="text-white/40 text-xs font-body mt-0.5">best pick (+{bestTeam.pts}pts)</div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })()}
-
-                      {/* Points by round breakdown */}
-                      {new Date() >= DEADLINE && games.length > 0 && (() => {
-                        const roundTotals: Record<number, number> = {}
-                        entry.teams.forEach(team => {
-                          const wins = games.filter(g => g.winner_team_id === team.id)
-                          wins.forEach(g => {
-                            const pts = (g.round ?? 0) + (team.seed >= 9 ? 3 : 0) + Math.floor((g.margin ?? 0) / 10)
-                            roundTotals[g.round] = (roundTotals[g.round] || 0) + pts
-                          })
-                        })
-                        const rounds = Object.keys(roundTotals).map(Number).sort()
-                        if (rounds.length === 0) return null
-                        return (
-                          <div className="flex gap-2 mb-4 flex-wrap">
-                            {rounds.map(r => (
-                              <div key={r} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-center min-w-[60px]">
-                                <div className="font-display text-lg text-maize-400">+{roundTotals[r]}</div>
-                                <div className="text-white/30 text-xs font-body">{['','R64','R32','S16','E8','F4','Champ'][r]}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      })()}
-
                       {/* Still alive */}
                       {alive.length > 0 && (
-                        <div className="mb-3">
-                          <div className="text-emerald-400 text-xs font-body font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <div className="mb-4">
+                          <div className="text-emerald-400 text-xs font-body font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                            Still alive ({alive.length})
+                            Still in the tournament ({alive.length})
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {alive.map(team => {
-                              const teamWins = games.filter(g => g.winner_team_id === team.id)
-                              const teamPts = teamWins.reduce((s, g) => s + (g.round ?? 0) + (team.seed >= 9 ? 3 : 0) + Math.floor((g.margin ?? 0) / 10), 0)
-                              return (
-                                <div key={team.id} className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2.5 gap-2">
-                                  <TeamBadge name={team.name} seed={team.seed} showRecord={false} size="sm" />
-                                  <div className="text-right shrink-0">
-                                    {teamPts > 0 && <div className="text-emerald-400 text-xs font-body font-bold">+{teamPts}pts</div>}
-                                    {team.seed >= 9 && <div className="text-maize-400/70 text-xs font-body">+3 dog</div>}
-                                    <div className="text-emerald-400 text-xs">●</div>
-                                  </div>
-                                </div>
-                              )
-                            })}
+                            {alive.map(team => (
+                              <div key={team.id} className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 sm:px-4 py-2.5 gap-2">
+                                <TeamBadge name={team.name} seed={team.seed} showRecord={true} size="sm" />
+                                <span className="text-emerald-400 text-xs font-body shrink-0 ml-2">
+                                  {team.seed >= 9 ? '+3 bonus ●' : '●'}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -688,23 +599,18 @@ export default function MyEntriesPage() {
                       {/* Eliminated */}
                       {eliminated.length > 0 && (
                         <div>
-                          <div className="text-white/30 text-xs font-body font-bold uppercase tracking-widest mb-2">
+                          <div className="text-white/30 text-xs font-body font-bold uppercase tracking-widest mb-3">
                             Eliminated ({eliminated.length})
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {eliminated.map(team => {
-                              const teamWins = games.filter(g => g.winner_team_id === team.id)
-                              const teamPts = teamWins.reduce((s, g) => s + (g.round ?? 0) + (team.seed >= 9 ? 3 : 0) + Math.floor((g.margin ?? 0) / 10), 0)
-                              return (
-                                <div key={team.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 opacity-60 gap-2">
-                                  <TeamBadge name={team.name} seed={team.seed} showRecord={false} size="sm" eliminated />
-                                  <div className="text-right shrink-0">
-                                    {teamPts > 0 && <div className="text-white/40 text-xs font-body">+{teamPts}pts</div>}
-                                    <div className="text-red-400 text-xs font-body">Out R{team.eliminated_round}</div>
-                                  </div>
-                                </div>
-                              )
-                            })}
+                            {eliminated.map(team => (
+                              <div key={team.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 opacity-50 gap-2">
+                                <TeamBadge name={team.name} seed={team.seed} showRecord={false} size="sm" eliminated />
+                                <span className="text-red-400 text-xs font-body shrink-0 ml-2">
+                                  Out {ROUND_NAMES[team.eliminated_round!]}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}

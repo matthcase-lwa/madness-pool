@@ -78,17 +78,10 @@ export default function Home() {
           and every upset matters.
         </p>
 
-        {/* Countdown or tournament live indicator */}
-        {entriesOpen ? (
-          <div className="mb-4">
-            <Countdown deadline={DEADLINE} compact onExpired={() => setEntriesOpen(false)} />
-          </div>
-        ) : (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 font-body text-sm font-bold">Tournament in progress</span>
-          </div>
-        )}
+        {/* Countdown */}
+        <div className="mb-4">
+          <Countdown deadline={DEADLINE} compact onExpired={() => setEntriesOpen(false)} />
+        </div>
 
         {/* CTA buttons */}
         <div className="flex flex-wrap gap-3 mb-6">
@@ -97,19 +90,13 @@ export default function Home() {
               Submit Entries →
             </Link>
           ) : (
-            <Link href="/leaderboard" className="btn-primary px-6 py-3 text-sm sm:text-base">
-              🏆 Live Leaderboard →
+            <Link href="/picks" className="btn-primary px-6 py-3 text-sm sm:text-base">
+              View All Picks →
             </Link>
           )}
-          {entriesOpen ? (
-            <Link href="/leaderboard" className="btn-secondary px-6 py-3 text-sm sm:text-base">
-              View Leaderboard
-            </Link>
-          ) : (
-            <Link href="/my-entries" className="btn-secondary px-6 py-3 text-sm sm:text-base">
-              My Entries
-            </Link>
-          )}
+          <Link href="/leaderboard" className="btn-secondary px-6 py-3 text-sm sm:text-base">
+            View Leaderboard
+          </Link>
         </div>
 
         {/* Stats row */}

@@ -571,7 +571,10 @@ export default function EnterPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!form.nickname.trim() || !isPinValid(form.pin) || loading}
-                className={form.nickname.trim() && form.email.trim() ? 'w-full py-4 rounded-lg font-bold font-body text-lg transition-all btn-primary' : 'w-full py-4 rounded-lg font-bold font-body text-lg transition-all bg-white/10 text-white/30 cursor-not-allowed'}
+                className={`w-full py-4 rounded-lg font-bold font-body text-lg transition-all ${form.nickname.trim()
+                  ? 'btn-primary'
+                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+                }`}
               >
                 {loading ? 'Submitting...' : 'Submit My Picks 🏀'}
               </button>

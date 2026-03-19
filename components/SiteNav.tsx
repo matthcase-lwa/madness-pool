@@ -69,7 +69,7 @@ export default function SiteNav() {
             <Tour />
             <NavCTA />
             <ParticipantCount />
-            <a href="/admin" className="text-white/20 hover:text-white/40 text-xs font-body transition-colors">Admin</a>
+            <a href="/admin" className="text-white/20 hover:text-white/40 text-xs font-body">Admin</a>
           </div>
         </div>
       )}
