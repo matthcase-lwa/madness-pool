@@ -462,6 +462,80 @@ function AutoScoreImporter({ adminPassword, year }: { adminPassword: string; yea
 }
 
 
+function getEmailTemplates(participantCount: number, paidCount: number, timeLeft: string, hoursLeft: number, leaderLines: string) {
+  const hypeBody = [
+    'Hey everyone,',
+    '',
+    "Just wanted to give you a quick update on this year's pool!",
+    '',
+    'Pool Update:',
+    '- Entries submitted: ' + participantCount,
+    '- Payments confirmed: ' + paidCount + ' of ' + participantCount,
+    '- Time until tip-off: ' + timeLeft,
+    '',
+    hoursLeft > 0
+      ? 'There's still time to submit your picks or make changes before tip-off. Head to the site and use your PIN to edit your selections.'
+      : 'Picks are now locked — let the madness begin!',
+    '',
+    'Visit the site: https://madness-pool.vercel.app',
+    '',
+    'Good luck everyone — may your underdogs run deep!',
+    '',
+    'Matt',
+  ].join('\n')
+
+  const paymentBody = [
+    'Hey,',
+    '',
+    "Just a quick reminder that I haven't received your entry fee yet for this year's pool.",
+    '',
+    'Please send your entry fee via Venmo or Zelle to matthcase@gmail.com',
+    '',
+    "If I don't receive payment before tip-off, I'll need to remove your entry from the pool.",
+    '',
+    "If you've already paid and received this by mistake, please ignore it — I may just be running behind on tracking payments.",
+    '',
+    'Visit the site: https://madness-pool.vercel.app',
+    '',
+    'Thanks!',
+    'Matt',
+  ].join('\n')
+
+  const roundBody = [
+    'Hey everyone,',
+    '',
+    'Here's your Bracketless Madness update!',
+    '',
+    'Current Leaderboard:',
+    leaderLines,
+    '',
+    'Check the full leaderboard to see where you stand and which of your teams are still alive.',
+    '',
+    'Visit the site: https://madness-pool.vercel.app',
+    '',
+    'Matt',
+  ].join('\n')
+
+  return {
+    hype: {
+      label: 'Hype / Pool Update',
+      subject: 'Bracketless Madness 2026 — ' + participantCount + ' entries and counting!',
+      body: hypeBody,
+    },
+    payment: {
+      label: 'Payment Reminder',
+      subject: 'Action needed: Bracketless Madness 2026 payment',
+      body: paymentBody,
+    },
+    round: {
+      label: 'Round Update',
+      subject: 'Bracketless Madness — Round Update',
+      body: roundBody,
+    },
+  }
+}
+
+
 function GmailCopyButton({ year, unpaidOnly }: { year: number; unpaidOnly: boolean }) {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -512,62 +586,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
     ? topPlayers.slice(0, 3).map((p, i) => ['1.','2.','3.'][i] + ' ' + p.nickname + ' - ' + p.total_points + ' pts').join('\n')
     : '  Leaderboard updates after games begin'
 
-  const TEMPLATES = {
-    hype: {
-      label: '🏀 Hype / Pool Update',
-      subject: `🏀 Bracketless Madness 2026 — ${participantCount} entries and counting!`,
-      body: `Hey everyone,
-
-Just wanted to give you a quick update on this year's pool!
-
-📊 Pool Update:
-• Entries submitted: ${participantCount}
-• Payments confirmed: ${paidCount} of ${participantCount}
-• Time until tip-off: ${timeLeft}
-
-${hoursLeft > 0 ? `There's still time to submit your picks or make changes before tip-off. Head to the site and use your PIN to edit your selections.` : `Picks are now locked — let the madness begin!`}
-
-🏀 Visit the site: https://madness-pool.vercel.app
-
-Good luck everyone — may your underdogs run deep!
-
-Matt`
-    },
-    payment: {
-      label: '💰 Payment Reminder',
-      subject: `Action needed: Bracketless Madness 2026 payment`,
-      body: `Hey,
-
-Just a quick reminder that I haven't received your entry fee yet for this year's pool.
-
-💵 Please send your entry fee via Venmo or Zelle to matthcase@gmail.com
-
-If I don't receive payment before tip-off, I'll need to remove your entry from the pool.
-
-If you've already paid and received this by mistake, please ignore it — I may just be running behind on tracking payments.
-
-🏀 Visit the site: https://madness-pool.vercel.app
-
-Thanks!
-Matt`
-    },
-    round: {
-      label: '📊 Round Update',
-      subject: `🏀 Bracketless Madness — Round Update`,
-      body: `Hey everyone,
-
-Here's your Bracketless Madness update!
-
-🏆 Current Leaderboard:
-${leaderLines}
-
-Check the full leaderboard to see where you stand and which of your teams are still alive.
-
-🏀 Visit the site: https://madness-pool.vercel.app
-
-Matt`
-    }
-  }
+  const TEMPLATES = getEmailTemplates(participantCount, paidCount, timeLeft, hoursLeft, leaderLines)
 
   type TemplateKey = keyof typeof TEMPLATES
   const [template, setTemplate] = useState<TemplateKey>('hype')
@@ -783,6 +802,18 @@ Matt`
     </div>
   )
 }
+
+const JSON_EXAMPLE = '[
+  {
+    "year": 2024,
+    "nickname": "JCohen2",
+    "full_name": "Josh Cohen",
+    "total_points": 56,
+    "final_rank": 1,
+    "teams_picked": ["Duke", "MSU", "Texas Tech", ...]
+  },
+  ...
+]'
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null)
@@ -1286,17 +1317,7 @@ export default function AdminPage() {
                 Paste a JSON array of past results. Each record should have: year, nickname, full_name, total_points, final_rank, teams_picked (array of team names).
               </p>
               <div className="bg-black/30 rounded-lg p-4 mb-4 text-xs font-mono text-white/40">
-                {`[
-  {
-    "year": 2024,
-    "nickname": "JCohen2",
-    "full_name": "Josh Cohen",
-    "total_points": 56,
-    "final_rank": 1,
-    "teams_picked": ["Duke", "MSU", "Texas Tech", ...]
-  },
-  ...
-]`}
+                <pre style={{margin:0, whiteSpace:'pre-wrap'}}>{JSON_EXAMPLE}</pre>
               </div>
               <textarea
                 value={importJson}
