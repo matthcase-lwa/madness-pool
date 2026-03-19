@@ -96,20 +96,28 @@ export default function MyEntriesPage() {
       .select('participant_id, total_points, rank, teams_alive')
       .in('participant_id', ids)
 
-    // Get picks for all entries
-    const { data: picks } = await supabase
-      .from('picks')
-      .select(`participant_id, team:team_id(id, name, seed, region, eliminated_round)`)
-      .in('participant_id', ids)
+    // Get picks for all entries via service role API (bypasses RLS deadline)
+    // Fetch each participant's picks using their verified PIN
+    const picksResults = await Promise.all(
+      participants.map(p =>
+        fetch('/api/my-picks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participantId: p.id, pin: p.entry_pin, year: YEAR })
+        }).then(r => r.json()).then(({ teams }) => ({ participantId: p.id, teams: teams || [] }))
+      )
+    )
+    const picksByParticipant: Record<string, Team[]> = {}
+    picksResults.forEach(({ participantId, teams }) => {
+      picksByParticipant[participantId] = teams
+    })
 
     // Build entries
     const built: Entry[] = participants.map(p => {
       const score = scores?.find(s => s.participant_id === p.id)
-      const myPicks = (picks || [])
-        .filter(pk => pk.participant_id === p.id)
-        .map((pk: any) => pk.team as Team)
+      const myPicks = (picksByParticipant[p.id] || [])
         .filter(Boolean)
-        .sort((a, b) => a.seed - b.seed)
+        .sort((a: Team, b: Team) => a.seed - b.seed)
 
       return {
         id: p.id,
