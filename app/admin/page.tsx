@@ -113,7 +113,7 @@ function ExportPicks({ year, adminPassword }: { year: number; adminPassword: str
         {loading ? 'Exporting...' : 'Download Picks CSV'}
       </button>
       {msg && (
-        <p className={`text-sm font-body mt-3 ${msg.includes('fail') || msg.includes('error') ? 'text-red-400' : 'text-emerald-400'}`}>
+        <p className={msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('error') ? 'text-sm font-body mt-3 text-red-400' : 'text-sm font-body mt-3 text-emerald-400'}>
           {msg}
         </p>
       )}
@@ -775,7 +775,7 @@ Matt`
         </div>
 
         {result && (
-          <div className={`mt-4 px-4 py-3 rounded-lg text-sm font-body ${result.startsWith('✓') ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}>
+          <div className={result.startsWith('✓') ? 'mt-4 px-4 py-3 rounded-lg text-sm font-body bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'mt-4 px-4 py-3 rounded-lg text-sm font-body bg-red-500/15 text-red-400 border border-red-500/30'}>
             {result}
           </div>
         )}
@@ -1009,7 +1009,7 @@ export default function AdminPage() {
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {msg && (
-          <div className={`mb-6 px-4 py-3 rounded-lg text-sm font-body ${msg.startsWith('✓') ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}>
+          <div className={msg.startsWith('✓') ? 'mb-6 px-4 py-3 rounded-lg text-sm font-body bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'mb-6 px-4 py-3 rounded-lg text-sm font-body bg-red-500/15 text-red-400 border border-red-500/30'}>
             {msg} <button onClick={() => setMsg('')} className="ml-2 opacity-50 hover:opacity-100">✕</button>
           </div>
         )}

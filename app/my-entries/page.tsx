@@ -507,7 +507,7 @@ export default function MyEntriesPage() {
             <button
               onClick={handleLookup}
               disabled={!email.trim() || (new Date() < DEADLINE && pin.length !== 4) || loading}
-              className={`w-full py-3 rounded-lg font-bold font-body transition-all ${email.trim() && (new Date() >= DEADLINE || pin.length === 4) ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+              className={email.trim() && (new Date() >= DEADLINE || pin.length === 4) ? 'w-full py-3 rounded-lg font-bold font-body transition-all btn-primary' : 'w-full py-3 rounded-lg font-bold font-body transition-all bg-white/10 text-white/30 cursor-not-allowed'}
             >
               {loading ? 'Looking up...' : 'View My Entries →'}
             </button>
