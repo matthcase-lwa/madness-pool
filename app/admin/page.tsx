@@ -405,8 +405,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
   const unpaidCount = participantCount - paidCount
 
   const leaderLines = topPlayers.length > 0
-    ? topPlayers.slice(0, 3).map((p, i) => ['1.','2.','3.'][i] + ' ' + p.nickname + ' - ' + p.total_points + ' pts').join('
-')
+    ? topPlayers.slice(0, 3).map((p, i) => ['1.','2.','3.'][i] + ' ' + p.nickname + ' - ' + p.total_points + ' pts').join('\n')
     : '  Leaderboard updates after games begin'
 
   const TEMPLATES = {
