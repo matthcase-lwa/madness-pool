@@ -85,7 +85,7 @@ function ExportPicks({ year }: { year: number }) {
       const res = await fetch('/api/admin-export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: _adminPasswordCache, year })
+        body: JSON.stringify({ password: sessionStorage.getItem('madness_admin_pw') || '', year })
       })
       const result = await res.json()
       if (!res.ok || result.error) {
@@ -203,7 +203,7 @@ function PicksEditor({
     fetch('/api/admin-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: _adminPasswordCache, action: 'get', participantId: participant.id })
+      body: JSON.stringify({ password: sessionStorage.getItem('madness_admin_pw') || '', action: 'get', participantId: participant.id })
     })
       .then(r => r.json())
       .then(({ picks }) => {
@@ -218,7 +218,7 @@ function PicksEditor({
     const res = await fetch('/api/admin-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: _adminPasswordCache, action: 'delete', pickId })
+      body: JSON.stringify({ password: sessionStorage.getItem('madness_admin_pw') || '', action: 'delete', pickId })
     })
     const result = await res.json()
     if (result.error) {
@@ -245,7 +245,7 @@ function PicksEditor({
     const res = await fetch('/api/admin-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: _adminPasswordCache, action: 'insert', participantId: participant.id, teamId: addTeamId, year })
+      body: JSON.stringify({ password: sessionStorage.getItem('madness_admin_pw') || '', action: 'insert', participantId: participant.id, teamId: addTeamId, year })
     })
     const result = await res.json()
     if (result.error) {
