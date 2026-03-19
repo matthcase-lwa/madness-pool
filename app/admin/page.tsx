@@ -226,7 +226,7 @@ function PicksEditor({
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-maize-500/10">
           <div>
             <h2 className="font-display text-2xl text-chalk tracking-wider">EDIT PICKS</h2>
-            <p className="text-white/50 text-sm font-body">{participant.nickname}{participant.full_name ? ` · ${participant.full_name}` : ''}</p>
+            <p className="text-white/50 text-sm font-body">{participant.nickname}{participant.full_name ? ' · ' + participant.full_name : ''}</p>
           </div>
           <button onClick={onClose} className="text-white/30 hover:text-white/70 text-2xl">✕</button>
         </div>
@@ -251,7 +251,7 @@ function PicksEditor({
                 {currentPicks.map(pick => (
                   <div key={pick.id} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-2.5">
                     <div className="flex items-center gap-3">
-                      <span className={`seed-badge ${pick.team.seed === 1 ? 'seed-1' : pick.team.seed <= 4 ? 'seed-2' : pick.team.seed >= 9 ? 'seed-9plus' : 'seed-5plus'}`}>
+                      <span className={pick.team.seed === 1 ? 'seed-1' : pick.team.seed <= 4 ? 'seed-2' : pick.team.seed >= 9 ? 'seed-badge seed-9plus' : 'seed-badge seed-5plus'}>
                         #{pick.team.seed}
                       </span>
                       <div>
@@ -313,7 +313,7 @@ function PicksEditor({
                 <button
                   onClick={addPick}
                   disabled={!addTeamId || saving}
-                  className={`px-4 py-2 rounded-lg font-bold font-body text-sm transition-all shrink-0 ${addTeamId ? 'btn-primary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+                  className={addTeamId ? 'px-4 py-2 rounded-lg font-bold font-body text-sm transition-all shrink-0 btn-primary' : 'px-4 py-2 rounded-lg font-bold font-body text-sm transition-all shrink-0 bg-white/10 text-white/30 cursor-not-allowed'}
                 >
                   Add
                 </button>
@@ -412,16 +412,16 @@ function AutoScoreImporter({ adminPassword, year }: { adminPassword: string; yea
         {result && (
           <div className="mt-6 space-y-4">
             <div className="grid grid-cols-3 gap-3">
-              <div className={`rounded-lg p-4 text-center border ${importCount > 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
-                <div className={`font-display text-3xl ${importCount > 0 ? 'text-emerald-400' : 'text-white/30'}`}>{importCount}</div>
+              <div className={importCount > 0 ? 'rounded-lg p-4 text-center border bg-emerald-500/10 border-emerald-500/30' : 'rounded-lg p-4 text-center border bg-white/5 border-white/10'}>
+                <div className={importCount > 0 ? 'font-display text-3xl text-emerald-400' : 'font-display text-3xl text-white/30'}>{importCount}</div>
                 <div className="text-white/40 text-xs font-body mt-1">imported</div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
                 <div className="font-display text-3xl text-white/30">{result.skipped}</div>
                 <div className="text-white/40 text-xs font-body mt-1">skipped</div>
               </div>
-              <div className={`rounded-lg p-4 text-center border ${unmatchedCount > 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
-                <div className={`font-display text-3xl ${unmatchedCount > 0 ? 'text-red-400' : 'text-white/30'}`}>{unmatchedCount}</div>
+              <div className={unmatchedCount > 0 ? 'rounded-lg p-4 text-center border bg-red-500/10 border-red-500/30' : 'rounded-lg p-4 text-center border bg-white/5 border-white/10'}>
+                <div className={unmatchedCount > 0 ? 'font-display text-3xl text-red-400' : 'font-display text-3xl text-white/30'}>{unmatchedCount}</div>
                 <div className="text-white/40 text-xs font-body mt-1">unmatched</div>
               </div>
             </div>
@@ -563,7 +563,7 @@ function GmailCopyButton({ year, unpaidOnly }: { year: number; unpaidOnly: boole
       disabled={loading}
       className="btn-secondary text-sm py-2 px-4"
     >
-      {loading ? 'Loading...' : copied ? `✓ Copied!` : `📋 Copy ${unpaidOnly ? 'unpaid' : 'all'} emails for Gmail`}
+      {loading ? 'Loading...' : copied ? 'Copied!' : 'Copy ' + (unpaidOnly ? 'unpaid' : 'all') + ' emails for Gmail'}
     </button>
   )
 }
@@ -579,7 +579,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
   const now = new Date()
   const hoursLeft = Math.max(0, Math.floor((deadline.getTime() - now.getTime()) / 3600000))
   const daysLeft = Math.floor(hoursLeft / 24)
-  const timeLeft = hoursLeft > 48 ? `${daysLeft} days` : hoursLeft > 0 ? `${hoursLeft} hours` : 'Tip-off has passed'
+  const timeLeft = hoursLeft > 48 ? daysLeft + ' days' : hoursLeft > 0 ? hoursLeft + ' hours' : 'Tip-off has passed'
   const unpaidCount = participantCount - paidCount
 
   const leaderLines = topPlayers.length > 0
@@ -660,7 +660,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
               <button
                 key={key}
                 onClick={() => applyTemplate(key)}
-                className={`px-4 py-2 rounded-lg text-sm font-body font-bold transition-all ${template === key ? 'bg-maize-500 text-blue-900' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                className={template === key ? 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-maize-500 text-blue-900' : 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20'}
               >
                 {TEMPLATES[key].label}
               </button>
@@ -688,13 +688,13 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
           <span className="text-white/50 text-sm font-body">Send to:</span>
           <button
             onClick={() => setUnpaidOnly(false)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all ${!unpaidOnly ? 'bg-maize-500 text-blue-900' : 'bg-white/10 text-white/50'}`}
+            className={!unpaidOnly ? 'px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all bg-maize-500 text-blue-900' : 'px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all bg-white/10 text-white/50'}
           >
             All {participantCount} participants
           </button>
           <button
             onClick={() => setUnpaidOnly(true)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all ${unpaidOnly ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/50'}`}
+            className={unpaidOnly ? 'px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all bg-amber-500 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all bg-white/10 text-white/50'}
           >
             Unpaid only ({unpaidCount})
           </button>
@@ -755,7 +755,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
             <button
               onClick={() => sendEmail(true)}
               disabled={!previewEmail || sending}
-              className={`px-4 py-2 rounded-lg font-bold font-body text-sm shrink-0 transition-all ${previewEmail && !sending ? 'btn-secondary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+              className={previewEmail && !sending ? 'px-4 py-2 rounded-lg font-bold font-body text-sm shrink-0 transition-all btn-secondary' : 'px-4 py-2 rounded-lg font-bold font-body text-sm shrink-0 transition-all bg-white/10 text-white/30 cursor-not-allowed'}
             >
               {sending ? 'Sending...' : 'Send Preview'}
             </button>
@@ -1064,7 +1064,7 @@ export default function AdminPage() {
             <button
               key={t.key}
               onClick={() => setTab(t.key as any)}
-              className={`px-4 py-2 rounded-lg text-sm font-body font-bold transition-all ${tab === t.key ? 'bg-maize-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+              className={tab === t.key ? 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-maize-500 text-white' : 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20'}
             >
               {t.label}
             </button>
@@ -1101,8 +1101,8 @@ export default function AdminPage() {
               <div className="divide-y divide-white/5">
                 {teams.map(team => (
                   <div key={team.id} className="flex items-center gap-4 px-6 py-3">
-                    <span className={`seed-badge ${team.seed === 1 ? 'seed-1' : team.seed <= 4 ? 'seed-2' : 'seed-5plus'}`}>#{team.seed}</span>
-                    <span className="font-body text-chalk flex-1">{team.name}{team.playin_partner ? `/${team.playin_partner}` : ''}</span>
+                    <span className={team.seed === 1 ? 'seed-1' : team.seed <= 4 ? 'seed-badge seed-2' : 'seed-badge seed-5plus'}>#{team.seed}</span>
+                    <span className="font-body text-chalk flex-1">{team.name}{team.playin_partner ? '/' + team.playin_partner : ''}</span>
                     {team.region && <span className="text-white/30 text-xs font-body">{team.region}</span>}
                     {team.eliminated_round ? (
                       <span className="text-red-400 text-xs font-body">Out R{team.eliminated_round}</span>
@@ -1144,7 +1144,7 @@ export default function AdminPage() {
                     </div>
                     <button
                       onClick={() => togglePayment(p.id, p.payment_received)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold font-body transition-all ${p.payment_received ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}
+                      className={p.payment_received ? 'px-3 py-1 rounded-full text-xs font-bold font-body transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'px-3 py-1 rounded-full text-xs font-bold font-body transition-all bg-red-500/15 text-red-400 border border-red-500/30'}
                     >
                       {p.payment_received ? '✓ Paid' : '✗ Unpaid'}
                     </button>
