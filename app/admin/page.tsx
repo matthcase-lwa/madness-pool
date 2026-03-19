@@ -254,9 +254,16 @@ function PicksEditor({
     const result = await res.json()
     if (result.error) {
       setError(result.error)
-    } else if (data) {
-      setCurrentPicks(prev => [...prev, data as any].sort((a, b) => a.team.seed - b.team.seed))
+    } else {
       setAddTeamId('')
+      // Reload from DB immediately so the full updated list is shown
+      const refreshRes = await fetch('/api/admin-picks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword, action: 'get', participantId: participant.id })
+      })
+      const { picks } = await refreshRes.json()
+      if (picks) setCurrentPicks(picks as any)
     }
     setSaving(false)
   }
