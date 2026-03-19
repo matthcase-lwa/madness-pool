@@ -74,116 +74,58 @@ function EmailExport({ year }: { year: number }) {
   )
 }
 
-// CSV cell escaping — defined outside component to avoid SWC parser issues
-function csvCell(val: unknown): string {
-  const s = String(val == null ? '' : val)
-  const escaped = s.split('"').join('""')
-  return '"' + escaped + '"'
-}
-
 function ExportPicks({ year, adminPassword }: { year: number; adminPassword: string }) {
   const [loading, setLoading] = useState(false)
-  const [count, setCount] = useState<number | null>(null)
+  const [msg, setMsg] = useState('')
 
-  async function downloadCSV() {
+  async function handleExport() {
     setLoading(true)
+    setMsg('')
     try {
       const res = await fetch('/api/admin-export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, year }),
+        body: JSON.stringify({ password: adminPassword, year, returnCsv: true }),
       })
-      const result = await res.json()
-      if (!res.ok || result.error) {
-        alert(result.error || 'Export failed')
+      if (!res.ok) {
+        const d = await res.json()
+        setMsg(d.error || 'Export failed')
         setLoading(false)
         return
       }
-
-      const { participants, picks } = result
-      if (!participants || participants.length === 0) {
-        alert('No participants found.')
-        setLoading(false)
-        return
-      }
-
-      const pickMap: Record<string, { name: string; seed: number }[]> = {}
-      participants.forEach((p: any) => { pickMap[p.id] = [] })
-      picks?.forEach((pk: any) => {
-        if (pk.team && pickMap[pk.participant_id]) {
-          pickMap[pk.participant_id].push(pk.team)
-        }
-      })
-      Object.keys(pickMap).forEach(id => {
-        pickMap[id].sort((a: any, b: any) => a.seed - b.seed)
-      })
-
-      const headers = [
-        'Nickname', 'Full Name', 'Email', 'Tiebreaker', 'PIN',
-        'Paid', 'Pick 1', 'Pick 2', 'Pick 3', 'Pick 4',
-        'Pick 5', 'Pick 6', 'Pick 7', 'Pick 8',
-      ]
-
-      const rows = participants.map((p: any) => {
-        const myPicks = pickMap[p.id] || []
-        const cells = [
-          p.nickname,
-          p.full_name || '',
-          p.email || '',
-          p.tiebreaker ?? '',
-          p.entry_pin || '',
-          p.payment_received ? 'Yes' : 'No',
-          ...Array.from({ length: 8 }, (_: unknown, i: number) =>
-            myPicks[i] ? myPicks[i].name + ' (#' + myPicks[i].seed + ')' : ''
-          ),
-        ]
-        return cells.map(csvCell).join(',')
-      })
-
-      const csv = [headers.join(','), ...rows].join('\n')
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `bracketless-madness-${year}-picks-backup-${new Date().toISOString().split('T')[0]}.csv`
+      a.download = 'bracketless-' + year + '-picks.csv'
       a.click()
       URL.revokeObjectURL(url)
-      setCount(participants.length)
+      setMsg('Downloaded successfully')
     } catch (e: any) {
-      alert('Export failed: ' + e.message)
-    } finally {
-      setLoading(false)
+      setMsg('Export failed: ' + e.message)
     }
+    setLoading(false)
   }
 
   return (
     <div>
-      <button
-        onClick={downloadCSV}
-        disabled={loading}
-        className="btn-primary"
-      >
-        {loading ? 'Exporting...' : '⬇️ Download Picks CSV'}
+      <button onClick={handleExport} disabled={loading} className="btn-primary">
+        {loading ? 'Exporting...' : 'Download Picks CSV'}
       </button>
-      {count !== null && (
-        <p className="text-emerald-400 text-sm font-body mt-3">
-          ✓ Exported {count} participants successfully.
+      {msg && (
+        <p className={`text-sm font-body mt-3 ${msg.includes('fail') || msg.includes('error') ? 'text-red-400' : 'text-emerald-400'}`}>
+          {msg}
         </p>
       )}
       <div className="mt-6 bg-black/20 rounded-lg p-4 text-xs font-body text-white/40 space-y-2">
-        <p className="font-bold text-white/60">⚠️ Before making any changes to teams or data:</p>
+        <p className="font-bold text-white/60">Before making any changes to teams or the database, download a backup first.</p>
         <p>1. Click the button above to download a fresh backup</p>
-        <p>2. To fix a team name, use a targeted SQL update in Supabase — never re-run the full seed script</p>
-        <p className="font-mono bg-black/30 px-3 py-2 rounded text-white/50">
-          UPDATE teams SET name = 'New Name' WHERE year = {year} AND name = 'Old Name';
-        </p>
-        <p>3. To fix a seed, similarly: UPDATE teams SET seed = 5 WHERE year = {year} AND name = 'Team';</p>
-      </div>
-    </div>
+        <p>2. To fix a team name, use a targeted SQL update in Supabase</p>
       </div>
     </div>
   )
 }
+
 
 function PicksEditor({
   participant,
