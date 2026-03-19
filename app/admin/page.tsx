@@ -201,18 +201,20 @@ function PicksEditor({
   const [error, setError] = useState('')
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch('/api/admin-picks', {
+  async function refreshPicks() {
+    setLoading(true)
+    const res = await fetch('/api/admin-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: adminPassword, action: 'get', participantId: participant.id })
     })
-      .then(r => r.json())
-      .then(({ picks }) => {
-        if (picks) setCurrentPicks(picks as any)
-        setLoading(false)
-      })
-  }, [participant.id])
+    const { picks, error } = await res.json()
+    if (error) setError(error)
+    if (picks) setCurrentPicks(picks as any)
+    setLoading(false)
+  }
+
+  useEffect(() => { refreshPicks() }, [participant.id])
 
   async function removePick(pickId: string) {
     setSaving(true)
