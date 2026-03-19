@@ -23,6 +23,12 @@ interface Participant {
   id: string
   nickname: string
   full_name: string
+  tiebreaker: number | null
+}
+
+function SeedBadge({ seed }: { seed: number }) {
+  const cls = seed === 1 ? 'seed-1' : seed <= 4 ? 'seed-2' : 'seed-5plus'
+  return <span className={'seed-badge ' + cls}>#{seed}</span>
 }
 
 interface Pick {
@@ -74,7 +80,7 @@ export default function PicksPage() {
       // Load all participants
       const { data: parts } = await supabase
         .from('participants')
-        .select('id, nickname, full_name')
+        .select('id, nickname, full_name, tiebreaker')
         .eq('year', YEAR)
         .order('nickname')
 
@@ -236,7 +242,7 @@ export default function PicksPage() {
                           <div className="text-white/30 text-xs font-body">{participant.full_name}</div>
                         )}
                       </div>
-                      <div className="text-white/20 text-xs font-body">{picks.length} picks</div>
+                      <div className="text-white/40 text-xs font-body">Remaining: {picks.filter(t => !t.eliminated_round).length}/8</div>
                     </div>
                     {picks.length > 0 ? (
                       <div className="space-y-1.5">
@@ -253,6 +259,11 @@ export default function PicksPage() {
                       </div>
                     ) : (
                       <p className="text-white/20 text-xs font-body italic">No picks recorded</p>
+                    )}
+                    {participant.tiebreaker && (
+                      <div className="mt-2 text-white/25 text-xs font-body border-t border-white/5 pt-2">
+                        Tiebreaker: {participant.tiebreaker} pts
+                      </div>
                     )}
                   </button>
                 )

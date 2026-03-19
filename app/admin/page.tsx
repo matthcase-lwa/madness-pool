@@ -115,6 +115,15 @@ export default function AdminPage() {
     loadData()
   }
 
+  async function deleteGame(gameId: string, loserId: string, round: number) {
+    if (!confirm('Delete this game result? The losing team will be un-eliminated and scores will update.')) return
+    await supabase.from('games').delete().eq('id', gameId)
+    // Un-eliminate the loser
+    await supabase.from('teams').update({ eliminated_round: null }).eq('id', loserId)
+    setMsg('Game deleted. Scores will update shortly.')
+    loadData()
+  }
+
   async function addGame() {
     if (!gameForm.winner_id || !gameForm.loser_id || !gameForm.winner_score || !gameForm.loser_score) return
     const { error } = await supabase.from('games').insert({
@@ -212,7 +221,7 @@ export default function AdminPage() {
     await loadData()
     setMsg(`✓ Added ${nickname} — now use ✏️ Picks to add their team selections.`)
     // Auto-open picks editor for the new participant
-    if (data) setEditingParticipant(data as Participant)
+    if (data) setEditingParticipant(data)
   }
 
   const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-full"
@@ -282,7 +291,7 @@ export default function AdminPage() {
           ].map(t => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key as any)}
+              onClick={() => setTab(t.key)}
               className={tab === t.key ? 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-maize-500 text-white' : 'px-4 py-2 rounded-lg text-sm font-body font-bold transition-all bg-white/10 text-white/60 hover:bg-white/20'}
             >
               {t.label}
@@ -462,10 +471,15 @@ export default function AdminPage() {
                     const loser = teams.find(t => t.id === game.loser_team_id)
                     return (
                       <div key={game.id} className="px-6 py-3 flex items-center gap-4 text-sm font-body">
-                        <span className="text-white/30 text-xs">{ROUND_NAMES[game.round]}</span>
-                        <span className="text-emerald-400 font-bold">{winner?.name}</span>
-                        <span className="text-white/50">{game.winner_score}–{game.loser_score}</span>
-                        <span className="text-white/30">{loser?.name}</span>
+                        <span className="text-white/30 text-xs w-16 shrink-0">{ROUND_NAMES[game.round]}</span>
+                        <span className="text-emerald-400 font-bold flex-1">{winner?.name}</span>
+                        <span className="text-white/50 shrink-0">{game.winner_score}–{game.loser_score}</span>
+                        <span className="text-white/30 flex-1">{loser?.name}</span>
+                        <button
+                          onClick={() => deleteGame(game.id, game.loser_team_id, game.round)}
+                          className="text-red-400/50 hover:text-red-400 text-xs font-body shrink-0 ml-2"
+                          title="Delete this result"
+                        >✕</button>
                       </div>
                     )
                   })}

@@ -18,7 +18,7 @@ export default function EmailExport({ year }: { year: number }) {
       .not('email', 'is', null)
     if (data) {
       // Deduplicate emails
-      const unique = [...new Set(data.map(p => p.email).filter(Boolean))] as string[]
+      const unique = [...new Set(data.map(p => p.email).filter(Boolean))]
       setEmails(unique.sort())
     }
     setLoading(false)

@@ -90,7 +90,7 @@ export function GmailCopyButton({ year, unpaidOnly }: { year: number; unpaidOnly
       .not('email', 'is', null)
     if (data) {
       const filtered = unpaidOnly ? data.filter((p: any) => !p.payment_received) : data
-      const unique = [...new Set(filtered.map((p: any) => p.email).filter(Boolean))] as string[]
+      const unique = [...new Set(filtered.map((p: any) => p.email).filter(Boolean))] 
       await navigator.clipboard.writeText(unique.join(', '))
       setCopied(true)
       setTimeout(() => setCopied(false), 3000)
@@ -196,7 +196,7 @@ export default function EmailComposer({ year, adminPassword, participantCount, p
         <div className="mb-5">
           <label className="text-white/50 text-sm font-body block mb-2">Choose a template</label>
           <div className="flex gap-2 flex-wrap">
-            {(Object.keys(TEMPLATES) as TemplateKey[]).map(key => (
+            {Object.keys(TEMPLATES).map((key: any) => (
               <button
                 key={key}
                 onClick={() => applyTemplate(key)}

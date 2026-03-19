@@ -118,3 +118,12 @@
   opacity: 0;
   animation: slideUp 0.5s ease-out forwards;
 }
+
+/* Fix dropdown/select contrast — options need dark background */
+select option {
+  background-color: #00172e;
+  color: #f5f0e8;
+}
+select {
+  color: #f5f0e8;
+}

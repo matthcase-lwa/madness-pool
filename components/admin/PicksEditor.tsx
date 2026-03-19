@@ -35,7 +35,7 @@ export default function PicksEditor({
     })
     const { picks, error } = await res.json()
     if (error) setError(error)
-    if (picks) setCurrentPicks(picks as any)
+    if (picks) setCurrentPicks(picks)
     setLoading(false)
   }
 
@@ -88,7 +88,7 @@ export default function PicksEditor({
         body: JSON.stringify({ password: adminPassword, action: 'get', participantId: participant.id })
       })
       const { picks } = await refreshRes.json()
-      if (picks) setCurrentPicks(picks as any)
+      if (picks) setCurrentPicks(picks)
     }
     setSaving(false)
   }

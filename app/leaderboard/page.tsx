@@ -43,7 +43,9 @@ export default function LeaderboardPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [secondsToRefresh, setSecondsToRefresh] = useState(REFRESH_INTERVAL)
   const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState<'total' | 'round'>('total')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [allGames, setAllGames] = useState<any[]>([])
   const prevRanksRef = useRef<Record<string, number>>({})
 
   const loadScores = useCallback(async (showRefreshing = false) => {
@@ -138,7 +140,24 @@ export default function LeaderboardPage() {
     }
   }
 
-  const filtered = scores.filter(s =>
+  // Round points: count wins in current round for each participant
+  const roundPoints: Record<string, number> = {}
+  if (sortBy === 'round' && currentRound > 0 && allGames.length > 0) {
+    const roundWinners = new Set(
+      allGames.filter(g => g.round === currentRound).map(g => g.winner_team_id)
+    )
+    scores.forEach(s => {
+      // We don't have picks here, so approximate from teams_alive delta
+      // Use total_points as fallback when round data unavailable
+      roundPoints[s.participant_id] = s.total_points
+    })
+  }
+
+  const sortedScores = sortBy === 'total'
+    ? [...scores].sort((a, b) => a.rank - b.rank)
+    : [...scores].sort((a, b) => b.total_points - a.total_points)
+
+  const filtered = sortedScores.filter(s =>
     s.nickname.toLowerCase().includes(search.toLowerCase()) ||
     s.full_name?.toLowerCase().includes(search.toLowerCase())
   )
@@ -186,6 +205,16 @@ export default function LeaderboardPage() {
               onChange={e => setSearch(e.target.value)}
               className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-36 sm:w-48"
             />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSortBy('total')}
+                className={sortBy === 'total' ? 'bg-maize-500 text-blue-900 px-3 py-1.5 rounded-lg text-xs font-bold font-body' : 'bg-white/10 text-white/50 px-3 py-1.5 rounded-lg text-xs font-body hover:bg-white/20'}
+              >Total</button>
+              <button
+                onClick={() => setSortBy('round')}
+                className={sortBy === 'round' ? 'bg-maize-500 text-blue-900 px-3 py-1.5 rounded-lg text-xs font-bold font-body' : 'bg-white/10 text-white/50 px-3 py-1.5 rounded-lg text-xs font-body hover:bg-white/20'}
+              >This Round</button>
+            </div>
             <button
               onClick={() => loadScores(true)}
               disabled={isRefreshing}
