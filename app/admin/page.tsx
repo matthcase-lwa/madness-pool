@@ -391,7 +391,6 @@ function PicksEditor({
 }
 
 function AutoScoreImporter({ adminPassword, year }: { adminPassword: string; year: number }) {
-  const ROUND_NAMES = ['','Round of 64','Round of 32','Sweet 16','Elite 8','Final Four','Championship']
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [customDates, setCustomDates] = useState('')
