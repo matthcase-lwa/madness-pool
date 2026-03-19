@@ -803,17 +803,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
   )
 }
 
-const JSON_EXAMPLE = '[
-  {
-    "year": 2024,
-    "nickname": "JCohen2",
-    "full_name": "Josh Cohen",
-    "total_points": 56,
-    "final_rank": 1,
-    "teams_picked": ["Duke", "MSU", "Texas Tech", ...]
-  },
-  ...
-]'
+const JSON_EXAMPLE = '[\n  {\n    "year": 2024,\n    "nickname": "JCohen2",\n    "total_points": 56,\n    "final_rank": 1,\n    "teams_picked": ["Duke", "MSU", ...]\n  }\n]'
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null)
