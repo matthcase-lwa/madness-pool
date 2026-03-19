@@ -474,7 +474,7 @@ function getEmailTemplates(participantCount: number, paidCount: number, timeLeft
     '- Time until tip-off: ' + timeLeft,
     '',
     hoursLeft > 0
-      ? 'There's still time to submit your picks or make changes before tip-off. Head to the site and use your PIN to edit your selections.'
+      ? "There's still time to submit your picks or make changes before tip-off. Head to the site and use your PIN to edit your selections."
       : 'Picks are now locked — let the madness begin!',
     '',
     'Visit the site: https://madness-pool.vercel.app',
@@ -504,7 +504,7 @@ function getEmailTemplates(participantCount: number, paidCount: number, timeLeft
   const roundBody = [
     'Hey everyone,',
     '',
-    'Here's your Bracketless Madness update!',
+    "Here's your Bracketless Madness update!",
     '',
     'Current Leaderboard:',
     leaderLines,
