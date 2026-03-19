@@ -340,14 +340,7 @@ function PicksEditor({
 
 function AutoScoreImporter({ adminPassword, year }: { adminPassword: string; year: number }) {
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{
-    imported: number
-    skipped: number
-    unmatched: string[]
-    results: string[]
-    skippedList: string[]
-    error?: string
-  } | null>(null)
+  const [result, setResult] = useState<any>(null)
   const [customDates, setCustomDates] = useState('')
 
   async function runImport() {
@@ -588,8 +581,7 @@ function EmailComposer({ year, adminPassword, participantCount, paidCount, topPl
 
   const TEMPLATES = getEmailTemplates(participantCount, paidCount, timeLeft, hoursLeft, leaderLines)
 
-  type TemplateKey = keyof typeof TEMPLATES
-  const [template, setTemplate] = useState<TemplateKey>('hype')
+  const [template, setTemplate] = useState<'hype' | 'payment' | 'round'>('hype')
   const [subject, setSubject] = useState(TEMPLATES.hype.subject)
   const [body, setBody] = useState(TEMPLATES.hype.body)
   const [unpaidOnly, setUnpaidOnly] = useState(false)
