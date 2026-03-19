@@ -187,19 +187,20 @@ export default function MyEntriesPage() {
 
   async function savePickChange(entryId: string, removeTeamId: string, addTeamId: string) {
     if (new Date() >= DEADLINE) return { error: 'Entries are locked after tip-off.' }
-    // Remove old pick
-    const { error: delErr } = await supabase
-      .from('picks')
-      .delete()
-      .eq('participant_id', entryId)
-      .eq('team_id', removeTeamId)
-    if (delErr) return { error: delErr.message }
-
-    // Add new pick
-    const { error: insErr } = await supabase
-      .from('picks')
-      .insert({ participant_id: entryId, team_id: addTeamId, year: YEAR })
-    if (insErr) return { error: insErr.message }
+    // Use service role API — anon key can't delete picks due to RLS
+    const res = await fetch('/api/swap-pick', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        participantId: entryId,
+        pin,
+        removeTeamId,
+        addTeamId,
+        year: YEAR
+      })
+    })
+    const result = await res.json()
+    if (!res.ok || result.error) return { error: result.error || 'Swap failed' }
 
     // Refresh entries
     await loadEntries(email, pin)

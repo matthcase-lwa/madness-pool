@@ -12,6 +12,7 @@ const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 
 // Simple client-side admin auth (password stored in env)
 const ADMIN_KEY = 'madness_admin_authed'
+let _adminPasswordCache = ''
 
 interface Team { id: string; name: string; seed: number; region: string; eliminated_round: number | null; playin_partner: string | null; is_playin_pair: boolean }
 interface Participant { id: string; nickname: string; full_name: string; email: string; payment_received: boolean; payment_method: string; entry_pin: string | null }
@@ -80,12 +81,20 @@ function ExportPicks({ year }: { year: number }) {
   async function downloadCSV() {
     setLoading(true)
     try {
-      // Fetch all participants
-      const { data: participants } = await supabase
-        .from('participants')
-        .select('id, nickname, full_name, email, tiebreaker, entry_pin, payment_received')
-        .eq('year', year)
-        .order('nickname')
+      // Use service role API to bypass RLS deadline restriction
+      const res = await fetch('/api/admin-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: _adminPasswordCache, year })
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) {
+        alert(result.error || 'Export failed')
+        setLoading(false)
+        return
+      }
+
+      const { participants, picks } = result
 
       if (!participants || participants.length === 0) {
         alert('No participants found.')
@@ -93,23 +102,16 @@ function ExportPicks({ year }: { year: number }) {
         return
       }
 
-      // Fetch all picks with team names
-      const ids = participants.map(p => p.id)
-      const { data: picks } = await supabase
-        .from('picks')
-        .select('participant_id, team:team_id(name, seed)')
-        .in('participant_id', ids)
-
       // Group picks by participant
       const pickMap: Record<string, {name: string, seed: number}[]> = {}
-      participants.forEach(p => { pickMap[p.id] = [] })
+      participants.forEach((p: any) => { pickMap[p.id] = [] })
       picks?.forEach((pk: any) => {
         if (pk.team && pickMap[pk.participant_id]) {
           pickMap[pk.participant_id].push(pk.team)
         }
       })
       Object.keys(pickMap).forEach(id => {
-        pickMap[id].sort((a, b) => a.seed - b.seed)
+        pickMap[id].sort((a: any, b: any) => a.seed - b.seed)
       })
 
       // Build CSV
@@ -198,12 +200,14 @@ function PicksEditor({
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase
-      .from('picks')
-      .select('id, team:team_id(id, name, seed, region)')
-      .eq('participant_id', participant.id)
-      .then(({ data }) => {
-        if (data) setCurrentPicks(data as any)
+    fetch('/api/admin-picks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: _adminPasswordCache, action: 'get', participantId: participant.id })
+    })
+      .then(r => r.json())
+      .then(({ picks }) => {
+        if (picks) setCurrentPicks(picks as any)
         setLoading(false)
       })
   }, [participant.id])
@@ -211,9 +215,14 @@ function PicksEditor({
   async function removePick(pickId: string) {
     setSaving(true)
     setError('')
-    const { error } = await supabase.from('picks').delete().eq('id', pickId)
-    if (error) {
-      setError(error.message)
+    const res = await fetch('/api/admin-picks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: _adminPasswordCache, action: 'delete', pickId })
+    })
+    const result = await res.json()
+    if (result.error) {
+      setError(result.error)
     } else {
       setCurrentPicks(prev => prev.filter(p => p.id !== pickId))
     }
@@ -223,7 +232,6 @@ function PicksEditor({
 
   async function addPick() {
     if (!addTeamId) return
-    // Check not already picked
     if (currentPicks.some(p => p.team.id === addTeamId)) {
       setError('That team is already in this participant\'s picks.')
       return
@@ -234,13 +242,14 @@ function PicksEditor({
     }
     setSaving(true)
     setError('')
-    const { data, error } = await supabase
-      .from('picks')
-      .insert({ participant_id: participant.id, team_id: addTeamId, year })
-      .select('id, team:team_id(id, name, seed, region)')
-      .single()
-    if (error) {
-      setError(error.message)
+    const res = await fetch('/api/admin-picks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: _adminPasswordCache, action: 'insert', participantId: participant.id, teamId: addTeamId, year })
+    })
+    const result = await res.json()
+    if (result.error) {
+      setError(result.error)
     } else if (data) {
       setCurrentPicks(prev => [...prev, data as any].sort((a, b) => a.team.seed - b.team.seed))
       setAddTeamId('')
@@ -393,6 +402,7 @@ export default function AdminPage() {
   useEffect(() => {
     // Always resolve to true or false — null causes blank page
     if (sessionStorage.getItem(ADMIN_KEY) === 'true') {
+      _adminPasswordCache = sessionStorage.getItem('madness_admin_pw') || ''
       setAuthed(true)
     } else {
       setAuthed(false)
@@ -425,6 +435,8 @@ export default function AdminPage() {
     })
     if (res.ok) {
       sessionStorage.setItem(ADMIN_KEY, 'true')
+      sessionStorage.setItem('madness_admin_pw', password)
+      _adminPasswordCache = password
       setAuthed(true)
     } else {
       setMsg('❌ Wrong password')
@@ -525,8 +537,32 @@ export default function AdminPage() {
     if (!nickname) return
     const fullName = prompt('Full name (optional):') || ''
     const email = prompt('Email (optional):') || ''
-    await supabase.from('participants').insert({ year: YEAR, nickname, full_name: fullName, email })
-    loadData()
+    const tiebreaker = prompt('Tiebreaker (championship total pts):') || ''
+    const pin = prompt('4-digit PIN:') || '0000'
+
+    const { data, error } = await supabase
+      .from('participants')
+      .insert({
+        year: YEAR,
+        nickname,
+        full_name: fullName,
+        email,
+        tiebreaker: tiebreaker ? parseInt(tiebreaker) : null,
+        entry_pin: pin,
+        payment_received: true
+      })
+      .select()
+      .single()
+
+    if (error) {
+      setMsg(`Error: ${error.message}`)
+      return
+    }
+
+    await loadData()
+    setMsg(`✓ Added ${nickname} — now use ✏️ Picks to add their team selections.`)
+    // Auto-open picks editor for the new participant
+    if (data) setEditingParticipant(data as Participant)
   }
 
   const inputClass = "bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20 w-full"
