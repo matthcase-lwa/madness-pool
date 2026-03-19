@@ -390,11 +390,295 @@ function PicksEditor({
   )
 }
 
+function EmailComposer({ year, adminPassword, participantCount, paidCount, topPlayers }: {
+  year: number
+  adminPassword: string
+  participantCount: number
+  paidCount: number
+  topPlayers: { nickname: string; total_points: number; rank: number }[]
+}) {
+  const deadline = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
+  const now = new Date()
+  const hoursLeft = Math.max(0, Math.floor((deadline.getTime() - now.getTime()) / 3600000))
+  const daysLeft = Math.floor(hoursLeft / 24)
+  const timeLeft = hoursLeft > 48 ? `${daysLeft} days` : hoursLeft > 0 ? `${hoursLeft} hours` : 'Tip-off has passed'
+  const unpaidCount = participantCount - paidCount
+
+  const leaderLines = topPlayers.length > 0
+    ? topPlayers.slice(0, 3).map((p, i) => `  ${['🥇','🥈','🥉'][i]} ${p.nickname} — ${p.total_points} pts`).join('
+')
+    : '  Leaderboard updates after games begin'
+
+  const TEMPLATES = {
+    hype: {
+      label: '🏀 Hype / Pool Update',
+      subject: `🏀 Bracketless Madness 2026 — ${participantCount} entries and counting!`,
+      body: `Hey everyone,
+
+Just wanted to give you a quick update on this year's pool!
+
+📊 Pool Update:
+• Entries submitted: ${participantCount}
+• Payments confirmed: ${paidCount} of ${participantCount}
+• Time until tip-off: ${timeLeft}
+
+${hoursLeft > 0 ? `There's still time to submit your picks or make changes before tip-off. Head to the site and use your PIN to edit your selections.` : `Picks are now locked — let the madness begin!`}
+
+🏀 Visit the site: https://madness-pool.vercel.app
+
+Good luck everyone — may your underdogs run deep!
+
+Matt`
+    },
+    payment: {
+      label: '💰 Payment Reminder',
+      subject: `Action needed: Bracketless Madness 2026 payment`,
+      body: `Hey,
+
+Just a quick reminder that I haven't received your entry fee yet for this year's pool.
+
+💵 Please send your entry fee via Venmo or Zelle to matthcase@gmail.com
+
+If I don't receive payment before tip-off, I'll need to remove your entry from the pool.
+
+If you've already paid and received this by mistake, please ignore it — I may just be running behind on tracking payments.
+
+🏀 Visit the site: https://madness-pool.vercel.app
+
+Thanks!
+Matt`
+    },
+    round: {
+      label: '📊 Round Update',
+      subject: `🏀 Bracketless Madness — Round Update`,
+      body: `Hey everyone,
+
+Here's your Bracketless Madness update!
+
+🏆 Current Leaderboard:
+${leaderLines}
+
+Check the full leaderboard to see where you stand and which of your teams are still alive.
+
+🏀 Visit the site: https://madness-pool.vercel.app
+
+Matt`
+    }
+  }
+
+  type TemplateKey = keyof typeof TEMPLATES
+  const [template, setTemplate] = useState<TemplateKey>('hype')
+  const [subject, setSubject] = useState(TEMPLATES.hype.subject)
+  const [body, setBody] = useState(TEMPLATES.hype.body)
+  const [unpaidOnly, setUnpaidOnly] = useState(false)
+  const [previewEmail, setPreviewEmail] = useState('')
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  function applyTemplate(key: TemplateKey) {
+    setTemplate(key)
+    setSubject(TEMPLATES[key].subject)
+    setBody(TEMPLATES[key].body)
+    // Auto-select unpaid only for payment reminder
+    setUnpaidOnly(key === 'payment')
+    setResult('')
+    setShowConfirm(false)
+  }
+
+  const recipientCount = unpaidOnly ? unpaidCount : participantCount
+
+  async function sendEmail(previewOnly: boolean) {
+    if (!previewOnly && !showConfirm) {
+      setShowConfirm(true)
+      return
+    }
+    setSending(true)
+    setResult('')
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: adminPassword,
+          subject,
+          body,
+          previewOnly,
+          previewEmail,
+          unpaidOnly,
+          year
+        })
+      })
+      const data = await res.json()
+      if (data.error) {
+        setResult(`❌ ${data.error}`)
+      } else {
+        setResult(`✓ ${data.message}`)
+        setShowConfirm(false)
+      }
+    } catch (e: any) {
+      setResult(`❌ ${e.message}`)
+    }
+    setSending(false)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-2">SEND EMAIL</h2>
+        <p className="text-white/40 text-sm font-body mb-6">
+          Choose a template, customize it, preview it in your inbox, then send.
+        </p>
+
+        {/* Template picker */}
+        <div className="mb-5">
+          <label className="text-white/50 text-sm font-body block mb-2">Choose a template</label>
+          <div className="flex gap-2 flex-wrap">
+            {(Object.keys(TEMPLATES) as TemplateKey[]).map(key => (
+              <button
+                key={key}
+                onClick={() => applyTemplate(key)}
+                className={`px-4 py-2 rounded-lg text-sm font-body font-bold transition-all ${template === key ? 'bg-maize-500 text-blue-900' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+              >
+                {TEMPLATES[key].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-4 gap-3 mb-5">
+          {[
+            { label: 'All participants', value: participantCount },
+            { label: 'Paid', value: paidCount },
+            { label: 'Unpaid', value: unpaidCount },
+            { label: 'Until tip-off', value: timeLeft },
+          ].map(s => (
+            <div key={s.label} className="bg-white/5 rounded-lg p-3 text-center border border-white/10">
+              <div className="font-display text-xl text-maize-400 tracking-wider">{s.value}</div>
+              <div className="text-white/30 text-xs font-body mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recipient toggle */}
+        <div className="flex items-center gap-3 mb-5 p-3 bg-white/5 rounded-lg border border-white/10">
+          <span className="text-white/50 text-sm font-body">Send to:</span>
+          <button
+            onClick={() => setUnpaidOnly(false)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all ${!unpaidOnly ? 'bg-maize-500 text-blue-900' : 'bg-white/10 text-white/50'}`}
+          >
+            All {participantCount} participants
+          </button>
+          <button
+            onClick={() => setUnpaidOnly(true)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-body transition-all ${unpaidOnly ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/50'}`}
+          >
+            Unpaid only ({unpaidCount})
+          </button>
+        </div>
+
+        {/* Subject */}
+        <div className="mb-4">
+          <label className="text-white/50 text-sm font-body block mb-2">Subject line</label>
+          <input
+            type="text"
+            value={subject}
+            onChange={e => setSubject(e.target.value)}
+            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body text-sm focus:outline-none focus:border-maize-500"
+          />
+        </div>
+
+        {/* Body + Preview side by side */}
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="text-white/50 text-sm font-body block mb-2">Email body</label>
+            <textarea
+              value={body}
+              onChange={e => setBody(e.target.value)}
+              rows={18}
+              className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 resize-none"
+            />
+          </div>
+          <div>
+            <label className="text-white/50 text-sm font-body block mb-2">Preview</label>
+            <div className="rounded-lg overflow-hidden border border-white/10 bg-gray-100 text-gray-900 text-sm" style={{minHeight: '420px'}}>
+              <div style={{background: '#00172e', borderRadius: '8px 8px 0 0'}}>
+                <div style={{background: '#FFCB05', padding: '14px 20px'}}>
+                  <div style={{fontWeight: 900, fontSize: '16px', letterSpacing: '2px', color: '#00172e'}}>🏀 BRACKETLESS MADNESS</div>
+                  <div style={{fontSize: '11px', color: '#00172e', opacity: 0.7}}>2026 Annual Tournament Pool</div>
+                </div>
+                <div style={{padding: '20px', color: '#e8e8e8', fontSize: '13px', lineHeight: '1.7', whiteSpace: 'pre-wrap'}}>
+                  {body}
+                </div>
+                <div style={{padding: '12px 20px', borderTop: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: '11px'}}>
+                  madness-pool.vercel.app
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Send preview */}
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10 mb-4">
+          <div className="font-body font-bold text-chalk text-sm mb-2">Step 1 — Send preview to yourself</div>
+          <div className="flex gap-2">
+            <input
+              type="email"
+              value={previewEmail}
+              onChange={e => setPreviewEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="flex-1 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20"
+            />
+            <button
+              onClick={() => sendEmail(true)}
+              disabled={!previewEmail || sending}
+              className={`px-4 py-2 rounded-lg font-bold font-body text-sm shrink-0 transition-all ${previewEmail && !sending ? 'btn-secondary' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}
+            >
+              {sending ? 'Sending...' : 'Send Preview'}
+            </button>
+          </div>
+        </div>
+
+        {/* Send to all */}
+        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="font-body font-bold text-chalk text-sm mb-1">Step 2 — Send to {recipientCount} {unpaidOnly ? 'unpaid' : ''} participants</div>
+          <p className="text-white/30 text-xs font-body mb-3">Once you're happy with the preview, send to everyone.</p>
+          {showConfirm ? (
+            <div className="flex items-center gap-3">
+              <span className="text-amber-400 text-sm font-body">Send to {recipientCount} {unpaidOnly ? 'unpaid ' : ''}participants?</span>
+              <button onClick={() => sendEmail(false)} disabled={sending} className="btn-primary text-sm py-2 px-4">
+                {sending ? 'Sending...' : 'Yes, send now'}
+              </button>
+              <button onClick={() => setShowConfirm(false)} className="btn-secondary text-sm py-2 px-4">Cancel</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => sendEmail(false)}
+              disabled={sending}
+              className="btn-primary"
+            >
+              Send to All Participants →
+            </button>
+          )}
+        </div>
+
+        {result && (
+          <div className={`mt-4 px-4 py-3 rounded-lg text-sm font-body ${result.startsWith('✓') ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}>
+            {result}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
   const [tab, setTab] = useState<'teams' | 'participants' | 'scores' | 'import' | 'export' | 'email'>('teams')
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
+  const [scores, setScores] = useState<{nickname: string; total_points: number; rank: number}[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
   const [games, setGames] = useState<Game[]>([])
@@ -427,14 +711,16 @@ export default function AdminPage() {
 
   async function loadData() {
     setLoading(true)
-    const [teamsRes, partsRes, gamesRes] = await Promise.all([
+    const [teamsRes, partsRes, gamesRes, scoresRes] = await Promise.all([
       supabase.from('teams').select('*').eq('year', YEAR).order('seed'),
       supabase.from('participants').select('id, nickname, full_name, email, payment_received, payment_method, entry_pin').eq('year', YEAR).order('nickname'),
       supabase.from('games').select('*').eq('year', YEAR).order('round'),
+      supabase.from('participant_scores').select('nickname, total_points, rank').eq('year', YEAR).order('rank').limit(3),
     ])
     if (teamsRes.data) setTeams(teamsRes.data)
     if (partsRes.data) setParticipants(partsRes.data)
     if (gamesRes.data) setGames(gamesRes.data)
+    if (scoresRes.data) setScores(scoresRes.data)
     setLoading(false)
   }
 
@@ -639,6 +925,7 @@ export default function AdminPage() {
             { key: 'import', label: '📥 Import History' },
             { key: 'export', label: '💾 Export Picks' },
             { key: 'email', label: '✉️ Email List' },
+            { key: 'compose', label: '📨 Send Email' },
           ].map(t => (
             <button
               key={t.key}
@@ -836,6 +1123,16 @@ export default function AdminPage() {
         )}
 
         {/* Email list tab */}
+        {tab === 'compose' && (
+          <EmailComposer
+            year={YEAR}
+            adminPassword={password}
+            participantCount={participants.length}
+            paidCount={participants.filter(p => p.payment_received).length}
+            topPlayers={scores.slice(0, 3)}
+          />
+        )}
+
         {tab === 'email' && (
           <div className="space-y-6">
             <div className="card p-6">
