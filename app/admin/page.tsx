@@ -74,6 +74,13 @@ function EmailExport({ year }: { year: number }) {
   )
 }
 
+// CSV cell escaping — defined outside component to avoid SWC parser issues
+function csvCell(val: unknown): string {
+  const s = String(val == null ? '' : val)
+  const escaped = s.split('"').join('""')
+  return '"' + escaped + '"'
+}
+
 function ExportPicks({ year, adminPassword }: { year: number; adminPassword: string }) {
   const [loading, setLoading] = useState(false)
   const [count, setCount] = useState<number | null>(null)
@@ -81,11 +88,10 @@ function ExportPicks({ year, adminPassword }: { year: number; adminPassword: str
   async function downloadCSV() {
     setLoading(true)
     try {
-      // Use service role API to bypass RLS deadline restriction
       const res = await fetch('/api/admin-export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword, year })
+        body: JSON.stringify({ password: adminPassword, year }),
       })
       const result = await res.json()
       if (!res.ok || result.error) {
@@ -95,15 +101,13 @@ function ExportPicks({ year, adminPassword }: { year: number; adminPassword: str
       }
 
       const { participants, picks } = result
-
       if (!participants || participants.length === 0) {
         alert('No participants found.')
         setLoading(false)
         return
       }
 
-      // Group picks by participant
-      const pickMap: Record<string, {name: string, seed: number}[]> = {}
+      const pickMap: Record<string, { name: string; seed: number }[]> = {}
       participants.forEach((p: any) => { pickMap[p.id] = [] })
       picks?.forEach((pk: any) => {
         if (pk.team && pickMap[pk.participant_id]) {
@@ -114,26 +118,26 @@ function ExportPicks({ year, adminPassword }: { year: number; adminPassword: str
         pickMap[id].sort((a: any, b: any) => a.seed - b.seed)
       })
 
-      // Build CSV
       const headers = [
         'Nickname', 'Full Name', 'Email', 'Tiebreaker', 'PIN',
         'Paid', 'Pick 1', 'Pick 2', 'Pick 3', 'Pick 4',
-        'Pick 5', 'Pick 6', 'Pick 7', 'Pick 8'
+        'Pick 5', 'Pick 6', 'Pick 7', 'Pick 8',
       ]
 
-      const rows = participants.map(p => {
+      const rows = participants.map((p: any) => {
         const myPicks = pickMap[p.id] || []
-        return [
+        const cells = [
           p.nickname,
           p.full_name || '',
           p.email || '',
           p.tiebreaker ?? '',
           p.entry_pin || '',
           p.payment_received ? 'Yes' : 'No',
-          ...Array.from({ length: 8 }, (_, i) =>
-            myPicks[i] ? `${myPicks[i].name} (#${myPicks[i].seed})` : ''
-          )
-        ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+          ...Array.from({ length: 8 }, (_: unknown, i: number) =>
+            myPicks[i] ? myPicks[i].name + ' (#' + myPicks[i].seed + ')' : ''
+          ),
+        ]
+        return cells.map(csvCell).join(',')
       })
 
       const csv = [headers.join(','), ...rows].join('\n')
