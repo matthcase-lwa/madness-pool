@@ -24,7 +24,7 @@ export default function PicksEditor({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState<any>(null)
 
   async function refreshPicks() {
     setLoading(true)

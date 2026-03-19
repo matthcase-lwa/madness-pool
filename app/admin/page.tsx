@@ -25,7 +25,7 @@ interface Game { id: string; round: number; winner_team_id: string; loser_team_i
 const JSON_EXAMPLE = '[\n  {\n    "year": 2024,\n    "nickname": "JCohen2",\n    "total_points": 56,\n    "final_rank": 1,\n    "teams_picked": ["Duke", "MSU", ...]\n  }\n]'
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState<boolean | null>(null)
+  const [authed, setAuthed] = useState<any>(null)
   const [password, setPassword] = useState('')
   const [tab, setTab] = useState('teams')
   const [editingParticipant, setEditingParticipant] = useState<any>(null)
@@ -152,7 +152,7 @@ export default function AdminPage() {
   async function resetPin(participantId: string, nickname: string) {
     const newPin = prompt(`Reset PIN for ${nickname}. Enter new 4-digit PIN:`)
     if (!newPin) return
-    if (!/^[0-9]{4}$/.test(newPin)) {
+    if (!newPin.match(/^[0-9]{4}$/)) {
       setMsg('❌ PIN must be exactly 4 digits')
       return
     }
