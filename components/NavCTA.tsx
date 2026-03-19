@@ -16,7 +16,7 @@ export default function NavCTA() {
     return () => clearInterval(interval)
   }, [])
 
-  // After tipoff — entries closed, show My Entries
+  // After tipoff — just My Entries
   if (pastDeadline) {
     return (
       <Link href="/my-entries" className="btn-primary text-sm py-2 px-4">
@@ -25,7 +25,7 @@ export default function NavCTA() {
     )
   }
 
-  // Before tipoff — already submitted → My Entries
+  // Before tipoff — already submitted: My Entries primary
   if (hasEntered) {
     return (
       <Link href="/my-entries" className="btn-primary text-sm py-2 px-4">
@@ -34,7 +34,7 @@ export default function NavCTA() {
     )
   }
 
-  // Before tipoff — not yet submitted → Submit Entries
+  // Before tipoff — not yet submitted: Submit Entries
   return (
     <Link href="/enter" className="btn-primary text-sm py-2 px-4">
       Submit Entries

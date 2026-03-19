@@ -390,6 +390,150 @@ function PicksEditor({
   )
 }
 
+function AutoScoreImporter({ adminPassword, year }: { adminPassword: string; year: number }) {
+  const ROUND_NAMES = ['','Round of 64','Round of 32','Sweet 16','Elite 8','Final Four','Championship']
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<any>(null)
+  const [customDates, setCustomDates] = useState('')
+
+  async function runImport() {
+    setLoading(true)
+    setResult(null)
+    const dates = customDates.trim()
+      ? customDates.trim().split(/[,\s]+/).map(d => d.replace(/-/g,''))
+      : undefined
+    const res = await fetch('/api/auto-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPassword, year, dates })
+    })
+    const data = await res.json()
+    setResult(data)
+    setLoading(false)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-2">⚡ AUTO-IMPORT SCORES</h2>
+        <p className="text-white/40 text-sm font-body mb-6">
+          Pulls completed NCAA Tournament games from ESPN and automatically records results,
+          eliminates teams, and updates the leaderboard. Run this after each session of games.
+        </p>
+
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 text-amber-400 text-xs font-body mb-6">
+          ⚠️ Only imports completed games. Skips games already in the database. Safe to run multiple times.
+        </div>
+
+        <div className="mb-4">
+          <label className="text-white/50 text-sm font-body block mb-2">
+            Dates to import (optional — defaults to today)
+          </label>
+          <input
+            type="text"
+            value={customDates}
+            onChange={e => setCustomDates(e.target.value)}
+            placeholder="e.g. 20260320, 20260321 (or leave blank for today)"
+            className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-chalk font-body text-sm focus:outline-none focus:border-maize-500 placeholder:text-white/20"
+          />
+          <p className="text-white/20 text-xs font-body mt-1">Format: YYYYMMDD, comma or space separated</p>
+        </div>
+
+        <button
+          onClick={runImport}
+          disabled={loading}
+          className="btn-primary"
+        >
+          {loading ? '⏳ Importing from ESPN...' : '⚡ Import Today's Results from ESPN'}
+        </button>
+
+        {result && (
+          <div className="mt-6 space-y-4">
+            {/* Summary */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className={`rounded-lg p-4 text-center border ${result.imported > 0 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
+                <div className={`font-display text-3xl ${result.imported > 0 ? 'text-emerald-400' : 'text-white/30'}`}>{result.imported}</div>
+                <div className="text-white/40 text-xs font-body mt-1">imported</div>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
+                <div className="font-display text-3xl text-white/30">{result.skipped}</div>
+                <div className="text-white/40 text-xs font-body mt-1">skipped</div>
+              </div>
+              <div className={`rounded-lg p-4 text-center border ${result.unmatched?.length > 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+                <div className={`font-display text-3xl ${result.unmatched?.length > 0 ? 'text-red-400' : 'text-white/30'}`}>{result.unmatched?.length || 0}</div>
+                <div className="text-white/40 text-xs font-body mt-1">unmatched</div>
+              </div>
+            </div>
+
+            {/* Imported games */}
+            {result.results?.length > 0 && (
+              <div>
+                <div className="text-emerald-400 text-xs font-body font-bold uppercase tracking-widest mb-2">✓ Imported</div>
+                <div className="bg-black/20 rounded-lg p-3 space-y-1 max-h-48 overflow-y-auto">
+                  {result.results.map((r: string, i: number) => (
+                    <div key={i} className="text-emerald-400/70 text-xs font-body font-mono">{r}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Unmatched teams — need manual fix */}
+            {result.unmatched?.length > 0 && (
+              <div>
+                <div className="text-red-400 text-xs font-body font-bold uppercase tracking-widest mb-2">⚠️ Teams not matched — enter manually</div>
+                <div className="bg-black/20 rounded-lg p-3 space-y-1">
+                  {result.unmatched.map((u: string, i: number) => (
+                    <div key={i} className="text-red-400/70 text-xs font-body font-mono">{u}</div>
+                  ))}
+                </div>
+                <p className="text-white/30 text-xs font-body mt-2">Use the 🏀 Enter Scores tab to record these manually.</p>
+              </div>
+            )}
+
+            {result.error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm font-body">
+                {result.error}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function GmailCopyButton({ year, unpaidOnly }: { year: number; unpaidOnly: boolean }) {
+  const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function copyEmails() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('participants')
+      .select('email, payment_received')
+      .eq('year', year)
+      .not('email', 'is', null)
+    if (data) {
+      const filtered = unpaidOnly ? data.filter((p: any) => !p.payment_received) : data
+      const unique = [...new Set(filtered.map((p: any) => p.email).filter(Boolean))] as string[]
+      await navigator.clipboard.writeText(unique.join(', '))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 3000)
+    }
+    setLoading(false)
+  }
+
+  return (
+    <button
+      onClick={copyEmails}
+      disabled={loading}
+      className="btn-secondary text-sm py-2 px-4"
+    >
+      {loading ? 'Loading...' : copied ? `✓ Copied!` : `📋 Copy ${unpaidOnly ? 'unpaid' : 'all'} emails for Gmail`}
+    </button>
+  )
+}
+
 function EmailComposer({ year, adminPassword, participantCount, paidCount, topPlayers }: {
   year: number
   adminPassword: string
@@ -660,6 +804,14 @@ Matt`
               Send to All Participants →
             </button>
           )}
+        </div>
+
+        {/* Gmail fallback */}
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <p className="text-white/30 text-xs font-body mb-2">
+            Prefer to send from Gmail? Copy the email list and paste into BCC:
+          </p>
+          <GmailCopyButton year={year} unpaidOnly={unpaidOnly} />
         </div>
 
         {result && (
@@ -1124,6 +1276,10 @@ export default function AdminPage() {
         )}
 
         {/* Email list tab */}
+        {tab === 'autoscore' && (
+          <AutoScoreImporter adminPassword={password} year={YEAR} />
+        )}
+
         {tab === 'compose' && (
           <EmailComposer
             year={YEAR}
