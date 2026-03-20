@@ -765,6 +765,56 @@ export default function AdminPage() {
     loadData()
   }
 
+  function getOpponent(teamId: string, round: number): string {
+    const team = teams.find(t => t.id === teamId)
+    if (!team) return ''
+    const region = team.region
+
+    // Bracket pods within a region (by original seed):
+    // R32: winners within same pod face each other
+    // S16: pod 0 winner vs pod 1 winner, pod 2 winner vs pod 3 winner
+    // E8:  top-half (pods 0,1) winner vs bottom-half (pods 2,3) winner
+    const pods = [[1,16,8,9],[5,12,4,13],[6,11,3,14],[7,10,2,15]]
+    const teamPod = pods.findIndex(p => p.includes(team.seed))
+
+    if (round === 1) {
+      // R64: fixed seed pairing
+      const pairs: Record<number,number> = {1:16,16:1,2:15,15:2,3:14,14:3,4:13,13:4,5:12,12:5,6:11,11:6,7:10,10:7,8:9,9:8}
+      const opp = teams.find(t => t.seed === pairs[team.seed] && t.region === region)
+      return opp ? opp.id : ''
+    }
+
+    if (round === 2) {
+      // R32: find the other R64 winner in same pod & region
+      const podSeeds = pods[teamPod]
+      const podTeamIds = teams.filter(t => t.region === region && podSeeds.includes(t.seed)).map(t => t.id)
+      const opp = games.find(g => g.round === 1 && g.winner_team_id !== teamId && podTeamIds.includes(g.winner_team_id))
+      return opp ? opp.winner_team_id : ''
+    }
+
+    if (round === 3) {
+      // S16: pods 0↔1 and pods 2↔3
+      const pairedPod = teamPod === 0 ? 1 : teamPod === 1 ? 0 : teamPod === 2 ? 3 : 2
+      const pairedPodSeeds = pods[pairedPod]
+      const pairedTeamIds = teams.filter(t => t.region === region && pairedPodSeeds.includes(t.seed)).map(t => t.id)
+      const opp = games.find(g => g.round === 2 && pairedTeamIds.includes(g.winner_team_id))
+      return opp ? opp.winner_team_id : ''
+    }
+
+    if (round === 4) {
+      // E8: top half (pods 0,1) vs bottom half (pods 2,3)
+      const isTopHalf = teamPod <= 1
+      const otherHalfPods = isTopHalf ? [2,3] : [0,1]
+      const otherSeeds = otherHalfPods.flatMap(p => pods[p])
+      const otherTeamIds = teams.filter(t => t.region === region && otherSeeds.includes(t.seed)).map(t => t.id)
+      const opp = games.find(g => g.round === 3 && otherTeamIds.includes(g.winner_team_id))
+      return opp ? opp.winner_team_id : ''
+    }
+
+    // F4 and Championship: only 4/2 teams left, easy to pick manually
+    return ''
+  }
+
   async function deleteGame(gameId: string, loserId: string, round: number) {
     if (!confirm('Delete this game? The losing team will be un-eliminated and scores will recalculate.')) return
     await supabase.from('games').delete().eq('id', gameId)
@@ -1090,7 +1140,15 @@ export default function AdminPage() {
                     onChange={e => {
                       setWinnerText(e.target.value)
                       const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
-                      setGameForm(f => ({ ...f, winner_id: match ? match.id : '' }))
+                      if (match) {
+                        const opponentId = getOpponent(match.id, parseInt(gameForm.round))
+                        const opponent = teams.find(t => t.id === opponentId)
+                        setGameForm(f => ({ ...f, winner_id: match.id, loser_id: opponentId }))
+                        if (opponent) setLoserText('#' + opponent.seed + ' ' + opponent.name)
+                        else setLoserText('')
+                      } else {
+                        setGameForm(f => ({ ...f, winner_id: '' }))
+                      }
                     }}
                   />
                   <datalist id="winner-teams">
@@ -1110,7 +1168,15 @@ export default function AdminPage() {
                     onChange={e => {
                       setLoserText(e.target.value)
                       const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
-                      setGameForm(f => ({ ...f, loser_id: match ? match.id : '' }))
+                      if (match) {
+                        const opponentId = getOpponent(match.id, parseInt(gameForm.round))
+                        const opponent = teams.find(t => t.id === opponentId)
+                        setGameForm(f => ({ ...f, loser_id: match.id, winner_id: opponentId }))
+                        if (opponent) setWinnerText('#' + opponent.seed + ' ' + opponent.name)
+                        else setWinnerText('')
+                      } else {
+                        setGameForm(f => ({ ...f, loser_id: '' }))
+                      }
                     }}
                   />
                   <datalist id="loser-teams">
