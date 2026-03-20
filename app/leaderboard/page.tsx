@@ -42,6 +42,7 @@ export default function LeaderboardPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('total')
+  const [allGames, setAllGames] = useState<any[]>([])
 
   const loadScores = useCallback(async () => {
     const { data } = await supabase
