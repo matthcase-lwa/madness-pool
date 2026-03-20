@@ -689,6 +689,8 @@ export default function AdminPage() {
 
   // Game form
   const [gameForm, setGameForm] = useState({ round: '1', winner_id: '', loser_id: '', winner_score: '', loser_score: '' })
+  const [winnerText, setWinnerText] = useState('')
+  const [loserText, setLoserText] = useState('')
 
   // Import form
   const [importJson, setImportJson] = useState('')
@@ -785,6 +787,8 @@ export default function AdminPage() {
     if (!error) {
       await supabase.from('teams').update({ eliminated_round: parseInt(gameForm.round) }).eq('id', gameForm.loser_id)
       setGameForm({ round: '1', winner_id: '', loser_id: '', winner_score: '', loser_score: '' })
+      setWinnerText('')
+      setLoserText('')
       setMsg('✓ Game result saved!')
       loadData()
     } else setMsg(`Error: ${error.message}`)
@@ -1081,9 +1085,10 @@ export default function AdminPage() {
                   <input
                     className={inputClass}
                     list="winner-teams"
-                    placeholder="Type or select winner..."
-                    value={teams.find(t => t.id === gameForm.winner_id) ? '#' + teams.find(t => t.id === gameForm.winner_id)!.seed + ' ' + teams.find(t => t.id === gameForm.winner_id)!.name : ''}
+                    placeholder="Type to search teams..."
+                    value={winnerText}
                     onChange={e => {
+                      setWinnerText(e.target.value)
                       const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
                       setGameForm(f => ({ ...f, winner_id: match ? match.id : '' }))
                     }}
@@ -1093,15 +1098,17 @@ export default function AdminPage() {
                       <option key={t.id} value={'#' + t.seed + ' ' + t.name} />
                     ))}
                   </datalist>
+                  {gameForm.winner_id && <div className="text-emerald-400 text-xs font-body mt-1">✓ {teams.find(t => t.id === gameForm.winner_id)?.name}</div>}
                 </div>
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Loser</label>
                   <input
                     className={inputClass}
                     list="loser-teams"
-                    placeholder="Type or select loser..."
-                    value={teams.find(t => t.id === gameForm.loser_id) ? '#' + teams.find(t => t.id === gameForm.loser_id)!.seed + ' ' + teams.find(t => t.id === gameForm.loser_id)!.name : ''}
+                    placeholder="Type to search teams..."
+                    value={loserText}
                     onChange={e => {
+                      setLoserText(e.target.value)
                       const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
                       setGameForm(f => ({ ...f, loser_id: match ? match.id : '' }))
                     }}
@@ -1111,6 +1118,7 @@ export default function AdminPage() {
                       <option key={t.id} value={'#' + t.seed + ' ' + t.name} />
                     ))}
                   </datalist>
+                  {gameForm.loser_id && <div className="text-red-400 text-xs font-body mt-1">✓ {teams.find(t => t.id === gameForm.loser_id)?.name}</div>}
                 </div>
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Winner Score</label>
@@ -1131,16 +1139,36 @@ export default function AdminPage() {
                   <h3 className="font-display text-xl text-maize-400 tracking-wider">RECORDED GAMES</h3>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {[...games].reverse().map(game => {
-                    const winner = teams.find(t => t.id === game.winner_team_id)
-                    const loser = teams.find(t => t.id === game.loser_team_id)
+                  {[1,2,3,4,5,6].map(round => {
+                    const roundGames = [...games].filter(g => g.round === round).sort((a, b) => {
+                      const wa = teams.find(t => t.id === a.winner_team_id)
+                      const wb = teams.find(t => t.id === b.winner_team_id)
+                      return (wa?.seed ?? 99) - (wb?.seed ?? 99)
+                    })
+                    if (roundGames.length === 0) return null
                     return (
-                      <div key={game.id} className="px-6 py-3 flex items-center gap-4 text-sm font-body">
-                        <span className="text-white/30 text-xs w-20 shrink-0">{ROUND_NAMES[game.round]}</span>
-                        <span className="text-emerald-400 font-bold flex-1">{winner?.name}</span>
-                        <span className="text-white/50 shrink-0">{game.winner_score}–{game.loser_score}</span>
-                        <span className="text-white/30 flex-1">{loser?.name}</span>
-                        <button onClick={() => deleteGame(game.id, game.loser_team_id, game.round)} className="text-red-400/40 hover:text-red-400 text-xs ml-2 shrink-0" title="Delete">✕</button>
+                      <div key={round}>
+                        <div className="px-6 py-2 bg-white/5 text-white/30 text-xs font-body font-bold uppercase tracking-widest">
+                          {ROUND_NAMES[round]} ({roundGames.length} game{roundGames.length !== 1 ? 's' : ''})
+                        </div>
+                        {roundGames.map(game => {
+                          const winner = teams.find(t => t.id === game.winner_team_id)
+                          const loser = teams.find(t => t.id === game.loser_team_id)
+                          return (
+                            <div key={game.id} className="px-6 py-3 flex items-center gap-3 text-sm font-body border-t border-white/5">
+                              <span className="text-emerald-400 font-bold flex-1 flex items-center gap-1.5">
+                                <span className="text-white/30 text-xs font-normal w-5 text-center shrink-0">#{winner?.seed}</span>
+                                {winner?.name}
+                              </span>
+                              <span className="text-white/50 shrink-0 tabular-nums">{game.winner_score}–{game.loser_score}</span>
+                              <span className="text-white/30 flex-1 flex items-center gap-1.5">
+                                <span className="text-white/20 text-xs w-5 text-center shrink-0">#{loser?.seed}</span>
+                                {loser?.name}
+                              </span>
+                              <button onClick={() => deleteGame(game.id, game.loser_team_id, game.round)} className="text-red-400/40 hover:text-red-400 text-xs shrink-0" title="Delete">✕</button>
+                            </div>
+                          )
+                        })}
                       </div>
                     )
                   })}
