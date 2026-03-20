@@ -116,6 +116,18 @@ export default function LeaderboardPage() {
     s.full_name?.toLowerCase().includes(search.toLowerCase())
   )
 
+  function teamPoints(teamId: string, seed: number): number {
+    let pts = 0
+    for (const g of allGames) {
+      if (g.winner_team_id !== teamId) continue
+      const base = [0,1,2,3,4,5,6][g.round] || 0
+      const underdog = seed >= 9 ? 3 : 0
+      const margin = Math.floor((g.margin || 0) / 10)
+      pts += base + underdog + margin
+    }
+    return pts
+  }
+
   const prizes = calculatePrizes(scores.length, ENTRY_FEE)
 
   const medalColors: Record<number, string> = {
@@ -163,7 +175,7 @@ export default function LeaderboardPage() {
               <button onClick={() => setSortBy('round')} className={sortBy === 'round' ? 'bg-maize-500 text-blue-900 px-3 py-1.5 rounded-lg text-xs font-bold' : 'bg-white/10 text-white/50 px-3 py-1.5 rounded-lg text-xs hover:bg-white/20'}>This Round</button>
             </div>
             <button
-              onClick={loadScores}
+              onClick={() => loadScores()}
               className="btn-secondary text-sm py-2 px-4"
             >
               ↻ Refresh
