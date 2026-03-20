@@ -1078,21 +1078,39 @@ export default function AdminPage() {
                 <div />
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Winner</label>
-                  <select className={inputClass} value={gameForm.winner_id} onChange={e => setGameForm(f => ({ ...f, winner_id: e.target.value }))}>
-                    <option value="">Select winner...</option>
+                  <input
+                    className={inputClass}
+                    list="winner-teams"
+                    placeholder="Type or select winner..."
+                    value={teams.find(t => t.id === gameForm.winner_id) ? '#' + teams.find(t => t.id === gameForm.winner_id)!.seed + ' ' + teams.find(t => t.id === gameForm.winner_id)!.name : ''}
+                    onChange={e => {
+                      const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
+                      setGameForm(f => ({ ...f, winner_id: match ? match.id : '' }))
+                    }}
+                  />
+                  <datalist id="winner-teams">
                     {teams.filter(t => !t.eliminated_round || t.eliminated_round >= parseInt(gameForm.round)).map(t => (
-                      <option key={t.id} value={t.id}>#{t.seed} {t.name}</option>
+                      <option key={t.id} value={'#' + t.seed + ' ' + t.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Loser</label>
-                  <select className={inputClass} value={gameForm.loser_id} onChange={e => setGameForm(f => ({ ...f, loser_id: e.target.value }))}>
-                    <option value="">Select loser...</option>
+                  <input
+                    className={inputClass}
+                    list="loser-teams"
+                    placeholder="Type or select loser..."
+                    value={teams.find(t => t.id === gameForm.loser_id) ? '#' + teams.find(t => t.id === gameForm.loser_id)!.seed + ' ' + teams.find(t => t.id === gameForm.loser_id)!.name : ''}
+                    onChange={e => {
+                      const match = teams.find(t => ('#' + t.seed + ' ' + t.name) === e.target.value)
+                      setGameForm(f => ({ ...f, loser_id: match ? match.id : '' }))
+                    }}
+                  />
+                  <datalist id="loser-teams">
                     {teams.filter(t => t.id !== gameForm.winner_id && (!t.eliminated_round || t.eliminated_round >= parseInt(gameForm.round))).map(t => (
-                      <option key={t.id} value={t.id}>#{t.seed} {t.name}</option>
+                      <option key={t.id} value={'#' + t.seed + ' ' + t.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
                 <div>
                   <label className="text-white/40 text-xs font-body mb-1 block">Winner Score</label>

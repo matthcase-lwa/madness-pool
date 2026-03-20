@@ -102,9 +102,8 @@ export default function Home() {
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { label: 'Entry Fee', value: 'Ask Matt' },
             { label: 'Players', value: participantCount !== null ? participantCount.toString() : '—' },
-            { label: 'Prize Pool', value: 'TBD' },
+            { label: 'Prize Pool', value: '$3,080' },
             { label: 'Teams to Pick', value: '8' },
           ].map(stat => (
             <div key={stat.label} className="card p-3 sm:p-5">
@@ -148,26 +147,27 @@ export default function Home() {
               <div className="accent-line">
                 <strong className="text-chalk">Tiebreaker:</strong> Predict total points scored in the championship game. Closest wins; furthest wins last place.
               </div>
-              <div className="accent-line">
-                <strong className="text-chalk">Payment:</strong> Entry fee via Venmo or Zelle to <ObfuscatedEmail />.
-              </div>
+
             </div>
           </div>
 
           <div className="card p-4 sm:p-6">
             <h2 className="font-display text-2xl sm:text-3xl text-maize-400 tracking-wider mb-4">PRIZE BREAKDOWN</h2>
             <div className="space-y-2">
-              {prizes.places.map((p, i) => (
-                <div key={p.place} className={`flex items-center justify-between py-2 px-3 rounded-lg ${i === 0 ? 'bg-maize-500/20 border border-maize-500/30' : 'bg-white/5'}`}>
-                  <div className="flex items-center gap-3">
-                    <span className={`font-display text-lg sm:text-xl tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/50'}`}>{p.place}</span>
-                    <span className="text-white/40 text-xs font-body">{p.pct}</span>
-                  </div>
-                  <span className={`font-body font-bold text-right ${i === 0 ? 'text-maize-400' : 'text-white/50'} text-xs`}>
-                    {i === prizes.places.length - 1 ? 'Entry fee back' : 'Updates at tip-off'}
-                  </span>
+              {[
+                { place: '1st 🥇', amount: '$1,520', highlight: true },
+                { place: '2nd 🥈', amount: '$760', highlight: false },
+                { place: '3rd 🥉', amount: '$395', highlight: false },
+                { place: '4th', amount: '$243', highlight: false },
+                { place: '5th', amount: '$122', highlight: false },
+                { place: 'Last', amount: '$40 back', highlight: false },
+              ].map((p) => (
+                <div key={p.place} className={`flex items-center justify-between py-2 px-3 rounded-lg ${p.highlight ? 'bg-maize-500/20 border border-maize-500/30' : 'bg-white/5'}`}>
+                  <span className={`font-display text-lg sm:text-xl tracking-wider ${p.highlight ? 'text-maize-400' : 'text-white/50'}`}>{p.place}</span>
+                  <span className={`font-body font-bold ${p.highlight ? 'text-maize-400' : 'text-white/50'}`}>{p.amount}</span>
                 </div>
               ))}
+              <div className="text-white/25 text-xs font-body pt-1 text-right">77 entries × $40 = $3,080 total pool</div>
             </div>
           </div>
         </div>
