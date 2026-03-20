@@ -307,9 +307,11 @@ export default function LeaderboardPage() {
                                   size="sm"
                                   eliminated={!alive}
                                 />
-                                <div className="text-right shrink-0 ml-2">
-                                  {alive && <span className="text-emerald-400 text-xs">●</span>}
-                                  {(() => { const pts = teamPoints(team.id, team.seed); return pts > 0 ? <span className="text-maize-400 text-xs font-bold ml-1">{pts}pts</span> : null })()}
+                                  <div className="text-right shrink-0 ml-2">
+                                  {alive && <span className="text-emerald-400 text-xs">● alive</span>}
+                                  {teamPoints(team.id, team.seed) > 0 && (
+                                    <div className="text-maize-400 text-xs font-bold">{teamPoints(team.id, team.seed)}pts</div>
+                                  )}
                                 </div>
                               </div>
                             )
