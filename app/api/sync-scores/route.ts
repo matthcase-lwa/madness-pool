@@ -85,6 +85,43 @@ const ESPN_NAME_MAP: Record<string, string> = {
   'Miami OH': 'SMU', 'Miami (OH)': 'SMU',               // play-in: resolve after game
   'UMBC/Howard': 'UMBC', 'Howard/UMBC': 'UMBC',         // play-in: resolve after game
   'Prairie View A&M/Lehigh': 'Prairie View A&M',         // play-in: resolve after game
+
+  // Full displayName with nicknames (what ESPN actually returns)
+  'North Dakota State Bison': 'North Dakota State',
+  'Kennesaw State Owls': 'Kennesaw State',
+  "Hawai'i Rainbow Warriors": 'Hawaii',
+  'Hawaii Rainbow Warriors': 'Hawaii',
+  'Cal Baptist Lancers': 'Cal Baptist',
+  'California Baptist Lancers': 'Cal Baptist',
+  'Prairie View A&M Panthers': 'Prairie View A&M',
+  'Lehigh Mountain Hawks': 'Lehigh',
+  'High Point Panthers': 'High Point',
+  'Wright State Raiders': 'Wright State',
+  'Tennessee State Tigers': 'Tennessee State',
+  'Long Island University Sharks': 'LIU',
+  "Saint Mary's Gaels": "St. John's",
+  'Queens Royals': 'Queens',
+  'McNeese Cowboys': 'McNeese',
+  'McNeese State Cowboys': 'McNeese',
+  'Troy Trojans': 'Troy',
+  'Penn Quakers': 'Penn',
+  'Pennsylvania Quakers': 'Penn',
+  'Idaho Vandals': 'Idaho',
+  'UMBC Retrievers': 'UMBC',
+  'Howard Bison': 'Howard',
+  'Siena Saints': 'Siena',
+  'Furman Paladins': 'Furman',
+  'Hofstra Pride': 'Hofstra',
+  'Akron Zips': 'Akron',
+  'South Florida Bulls': 'South Florida',
+  'Northern Iowa Panthers': 'Northern Iowa',
+  'Santa Clara Broncos': 'Santa Clara',
+  'Saint Louis Billikens': 'Saint Louis',
+  "St. John's Red Storm": "St. John's",
+  'Utah State Aggies': 'Utah State',
+  'TCU Horned Frogs': 'TCU',
+  'SMU Mustangs': 'SMU',
+  'VCU Rams': 'VCU',
 }
 
 // Map ESPN round number to our round number
@@ -216,14 +253,22 @@ export async function GET(req: NextRequest) {
       if (round === 0) continue // Skip First Four (play-in) and unrecognized
 
       // Match team names
-      const winnerName = winner.team?.displayName || winner.team?.shortDisplayName || ''
-      const loserName = loser.team?.displayName || loser.team?.shortDisplayName || ''
+      // Try shortDisplayName first (cleaner), fall back to displayName
+      const winnerName = winner.team?.shortDisplayName || winner.team?.displayName || ''
+      const loserName = loser.team?.shortDisplayName || loser.team?.displayName || ''
+      // Also keep displayName for fallback matching
+      const winnerDisplayName = winner.team?.displayName || ''
+      const loserDisplayName = loser.team?.displayName || ''
 
       const resolvedWinner = resolveTeamName(winnerName) ||
-        teamByName[winnerName.toLowerCase()]?.name
+        resolveTeamName(winnerDisplayName) ||
+        teamByName[winnerName.toLowerCase()]?.name ||
+        teamByName[winnerDisplayName.toLowerCase()]?.name
 
       const resolvedLoser = resolveTeamName(loserName) ||
-        teamByName[loserName.toLowerCase()]?.name
+        resolveTeamName(loserDisplayName) ||
+        teamByName[loserName.toLowerCase()]?.name ||
+        teamByName[loserDisplayName.toLowerCase()]?.name
 
       if (!resolvedWinner) { unmatched.push(`winner: ${winnerName}`); continue }
       if (!resolvedLoser) { unmatched.push(`loser: ${loserName}`); continue }
