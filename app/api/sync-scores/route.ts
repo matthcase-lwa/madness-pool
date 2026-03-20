@@ -111,12 +111,12 @@ function resolveTeamName(espnName: string): string | null {
 }
 
 export async function GET(req: NextRequest) {
-  // Accept: Vercel cron secret, or admin password (for manual Sync Now)
+  // Accept: admin password (Sync Now button), or public sync token (leaderboard auto-sync)
   const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET || ''
   const adminPass = process.env.ADMIN_PASSWORD || ''
+  const syncToken = process.env.NEXT_PUBLIC_SYNC_TOKEN || 'madness-sync-2026'
 
-  const validTokens = [adminPass, cronSecret].filter(Boolean)
+  const validTokens = [adminPass, syncToken].filter(Boolean)
   const token = authHeader?.replace('Bearer ', '') || ''
   
   if (!validTokens.includes(token)) {

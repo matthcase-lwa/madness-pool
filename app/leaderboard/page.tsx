@@ -69,9 +69,19 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     loadScores()
-    // Auto-refresh every 60 seconds during tournament
-    const interval = setInterval(loadScores, 60000)
-    return () => clearInterval(interval)
+    // Refresh scores from DB every 60 seconds
+    const refreshInterval = setInterval(loadScores, 60000)
+    // Trigger ESPN sync every 3 minutes (piggybacks on leaderboard views)
+    const syncInterval = setInterval(async () => {
+      try {
+        await fetch('/api/sync-scores', {
+          headers: { 'Authorization': 'Bearer ' + (process.env.NEXT_PUBLIC_SYNC_TOKEN || 'madness-sync-2026') }
+        })
+        // Reload scores after sync in case new games came in
+        loadScores()
+      } catch {}
+    }, 180000)
+    return () => { clearInterval(refreshInterval); clearInterval(syncInterval) }
   }, [loadScores])
 
   async function loadPicks(participantId: string) {
