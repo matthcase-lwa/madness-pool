@@ -683,6 +683,8 @@ export default function AdminPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<any>(null)
 
   // Team form
   const [teamForm, setTeamForm] = useState({ name: '', seed: '', region: '', is_playin_pair: false, playin_partner: '' })
@@ -711,6 +713,27 @@ export default function AdminPage() {
     if (!authed) return
     loadData()
   }, [authed])
+
+  async function syncNow() {
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const res = await fetch('/api/sync-scores', {
+        headers: { 'Authorization': 'Bearer ' + password }
+      })
+      const data = await res.json()
+      setSyncResult(data)
+      if (data.inserted > 0) {
+        loadData()
+        setMsg('Synced ' + data.inserted + ' new game' + (data.inserted !== 1 ? 's' : '') + ' from ESPN')
+      } else {
+        setMsg('Sync complete — no new games found')
+      }
+    } catch (e: any) {
+      setMsg('Sync failed: ' + e.message)
+    }
+    setSyncing(false)
+  }
 
   async function loadData() {
     setLoading(true)
@@ -1145,6 +1168,39 @@ export default function AdminPage() {
         {/* Scores tab */}
         {tab === 'scores' && (
           <div className="space-y-6">
+
+            {/* Auto-sync panel */}
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="font-display text-xl text-maize-400 tracking-wider">AUTO SYNC</h3>
+                  <p className="text-white/30 text-xs font-body mt-1">Pulls completed games from ESPN every 5 minutes automatically. Use Sync Now to force an immediate update.</p>
+                </div>
+                <button
+                  onClick={syncNow}
+                  disabled={syncing}
+                  className="btn-primary shrink-0 ml-4"
+                >
+                  {syncing ? 'Syncing...' : '⚡ Sync Now'}
+                </button>
+              </div>
+              {syncResult && (
+                <div className="mt-3 text-xs font-body space-y-1">
+                  <div className="text-emerald-400">{syncResult.inserted} game{syncResult.inserted !== 1 ? 's' : ''} inserted</div>
+                  {syncResult.games?.map((g: any, i: number) => (
+                    <div key={i} className="text-white/40">
+                      R{g.round}: {g.winner} def. {g.loser} ({g.score})
+                    </div>
+                  ))}
+                  {syncResult.unmatched?.length > 0 && (
+                    <div className="text-amber-400/70 mt-2">
+                      Unmatched teams (add manually): {syncResult.unmatched.join(', ')}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="card p-6">
               <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">RECORD GAME RESULT</h2>
               <div className="grid md:grid-cols-2 gap-4 mb-4">
