@@ -53,6 +53,7 @@ export default function PicksPage() {
   const [view, setView] = useState<'participants' | 'teams'>('participants')
   const [isOpen, setIsOpen] = useState(new Date() < DEADLINE)
   const [participantCount, setParticipantCount] = useState<number>(0)
+  const [allGames, setAllGames] = useState<any[]>([])
 
   useEffect(() => {
     setIsOpen(new Date() < DEADLINE)
@@ -127,10 +128,30 @@ export default function PicksPage() {
         pct: Math.round((s.count / total) * 100)
       })).sort((a, b) => b.count - a.count)
       setTeamStats(stats)
+
+      // Load games for point calculation
+      const { data: gamesData } = await supabase
+        .from('games')
+        .select('round, winner_team_id, margin')
+        .eq('year', YEAR)
+      if (gamesData) setAllGames(gamesData)
+
       setLoading(false)
     }
     load()
   }, [isOpen])
+
+  function teamPoints(teamId: string, seed: number): number {
+    let pts = 0
+    for (const g of allGames) {
+      if (g.winner_team_id !== teamId) continue
+      const base = [0,1,2,3,4,5,6][g.round] || 0
+      const underdog = seed >= 9 ? 3 : 0
+      const margin = Math.floor((g.margin || 0) / 10)
+      pts += base + underdog + margin
+    }
+    return pts
+  }
 
   // Still open — show countdown with friendly message
   if (isOpen) {
@@ -242,20 +263,28 @@ export default function PicksPage() {
                           <div className="text-white/30 text-xs font-body">{participant.full_name}</div>
                         )}
                       </div>
-                      <div className="text-white/40 text-xs font-body">Remaining: {picks.filter(t => !t.eliminated_round).length}/8</div>
+                      <div className="text-right">
+                        <div className="text-white/40 text-xs font-body">Remaining: {picks.filter(t => !t.eliminated_round).length}/8</div>
+                        {allGames.length > 0 && (() => { const total = picks.reduce((s, t) => s + teamPoints(t.id, t.seed), 0); return total > 0 ? <div className="text-maize-400 text-xs font-bold">{total} pts</div> : null })()}
+                      </div>
                     </div>
                     {picks.length > 0 ? (
                       <div className="space-y-1.5">
-                        {picks.map(team => (
-                          <TeamBadge
-                            key={team.id}
-                            name={team.name}
-                            seed={team.seed}
-                            showRecord={true}
-                            size="sm"
-                            eliminated={!!team.eliminated_round}
-                          />
-                        ))}
+                        {picks.map(team => {
+                          const pts = teamPoints(team.id, team.seed)
+                          return (
+                            <div key={team.id} className="flex items-center justify-between gap-2">
+                              <TeamBadge
+                                name={team.name}
+                                seed={team.seed}
+                                showRecord={true}
+                                size="sm"
+                                eliminated={!!team.eliminated_round}
+                              />
+                              {pts > 0 && <span className="text-maize-400 text-xs font-bold shrink-0">{pts}pts</span>}
+                            </div>
+                          )
+                        })}
                       </div>
                     ) : (
                       <p className="text-white/20 text-xs font-body italic">No picks recorded</p>
@@ -289,18 +318,21 @@ export default function PicksPage() {
                     </div>
                     <div className="grid md:grid-cols-2 gap-2 mb-1">
                       {seedTeams.map(({ team, count, pct, participants: pList }) => (
-                        <div key={team.id} className="card p-4">
+                        <div key={team.id} className={'card p-4' + (team.eliminated_round ? ' opacity-40 grayscale' : '')}>
                           <div className="flex items-center justify-between mb-2">
-                            <TeamBadge name={team.name} seed={team.seed} showRecord={true} showSeed={false} size="sm" />
+                            <div className="flex items-center gap-2">
+                              <TeamBadge name={team.name} seed={team.seed} showRecord={true} showSeed={false} size="sm" eliminated={!!team.eliminated_round} />
+                              {team.eliminated_round && <span className="text-red-400 text-xs font-body shrink-0">Out R{team.eliminated_round}</span>}
+                            </div>
                             <div className="text-right">
-                              <span className="font-display text-2xl text-maize-400 tracking-wider">{pct}%</span>
+                              <span className={'font-display text-2xl tracking-wider ' + (team.eliminated_round ? 'text-white/30' : 'text-maize-400')}>{pct}%</span>
                               <span className="text-white/30 text-xs font-body ml-1">({count})</span>
                             </div>
                           </div>
                           {/* Progress bar */}
                           <div className="w-full bg-white/10 rounded-full h-1.5 mb-2">
                             <div
-                              className="bg-maize-500 h-1.5 rounded-full transition-all duration-500"
+                              className={'h-1.5 rounded-full transition-all duration-500 ' + (team.eliminated_round ? 'bg-white/20' : 'bg-maize-500')}
                               style={{ width: `${pct}%` }}
                             />
                           </div>

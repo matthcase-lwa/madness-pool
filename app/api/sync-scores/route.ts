@@ -317,5 +317,6 @@ export async function GET(req: NextRequest) {
     unmatched: [...new Set(unmatched)],
     errors,
     syncedAt: new Date().toISOString(),
+    ...(debug ? { rawEvents } : {}),
   })
 }

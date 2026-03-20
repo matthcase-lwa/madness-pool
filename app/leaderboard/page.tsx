@@ -55,15 +55,16 @@ export default function LeaderboardPage() {
       setLastUpdated(new Date())
     }
 
-    // Get current round from games
+    // Get all games for point calculation
     const { data: games } = await supabase
       .from('games')
-      .select('round')
+      .select('round, winner_team_id, loser_team_id, winner_score, loser_score, margin')
       .eq('year', YEAR)
-      .order('round', { ascending: false })
-      .limit(1)
 
-    if (games?.[0]) setCurrentRound(games[0].round)
+    if (games && games.length > 0) {
+      setCurrentRound(Math.max(...games.map((g: any) => g.round)))
+      setAllGames(games)
+    }
     setLoading(false)
   }, [])
 
@@ -176,7 +177,7 @@ export default function LeaderboardPage() {
             {prizes.places.map((p, i) => (
               <div key={p.place} className={`card p-3 text-center ${i === 0 ? 'border-maize-500/40 bg-maize-500/10' : ''}`}>
                 <div className={`font-display text-lg tracking-wider ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{p.place}</div>
-                <div className={`font-body font-bold text-xs ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{i === prizes.places.length - 1 ? 'Entry back' : 'TBD'}</div>
+                <div className={`font-body font-bold text-xs ${i === 0 ? 'text-maize-400' : 'text-white/40'}`}>{i === prizes.places.length - 1 ? '$40 back' : '$' + p.amount.toLocaleString()}</div>
               </div>
             ))}
           </div>
@@ -242,7 +243,7 @@ export default function LeaderboardPage() {
                     {/* Prize amount */}
                     {isPrizePosition && prizeAmounts[participant.rank] && (
                       <div className="text-right hidden md:block">
-                        <div className="text-maize-400 font-bold text-sm font-body">Prize TBD</div>
+                        <div className="text-maize-400 font-bold text-sm font-body">${prizeAmounts[participant.rank]?.toLocaleString()}</div>
                         <div className="text-white/25 text-xs font-body">current prize</div>
                       </div>
                     )}
@@ -293,7 +294,10 @@ export default function LeaderboardPage() {
                                   size="sm"
                                   eliminated={!alive}
                                 />
-                                {alive && <span className="text-emerald-400 text-xs ml-2">●</span>}
+                                <div className="text-right shrink-0 ml-2">
+                                  {alive && <span className="text-emerald-400 text-xs">●</span>}
+                                  {(() => { const pts = teamPoints(team.id, team.seed); return pts > 0 ? <span className="text-maize-400 text-xs font-bold ml-1">{pts}pts</span> : null })()}
+                                </div>
                               </div>
                             )
                           })}
