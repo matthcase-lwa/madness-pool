@@ -743,6 +743,16 @@ export default function AdminPage() {
     }
   }
 
+  async function resolvePlayin(teamId: string, winnerName: string) {
+    await supabase.from('teams').update({
+      name: winnerName,
+      playin_partner: null,
+      is_playin_pair: false,
+    }).eq('id', teamId)
+    loadData()
+    setMsg('Play-in resolved: ' + winnerName + ' advances.')
+  }
+
   async function addTeam() {
     if (!teamForm.name || !teamForm.seed) return
     const { error } = await supabase.from('teams').insert({
@@ -1031,7 +1041,22 @@ export default function AdminPage() {
                 {teams.map(team => (
                   <div key={team.id} className="flex items-center gap-4 px-6 py-3">
                     <span className={`seed-badge ${team.seed === 1 ? 'seed-1' : team.seed <= 4 ? 'seed-2' : 'seed-5plus'}`}>#{team.seed}</span>
-                    <span className="font-body text-chalk flex-1">{team.name}{team.playin_partner ? `/${team.playin_partner}` : ''}</span>
+                    <span className="font-body text-chalk flex-1">
+                      {team.is_playin_pair ? (
+                        <span className="text-amber-400">{team.name}/{team.playin_partner} <span className="text-white/30 text-xs">(play-in)</span></span>
+                      ) : team.name}
+                    </span>
+                    {team.is_playin_pair && (
+                      <button
+                        onClick={() => {
+                          const winner = prompt('Which team won the play-in? Enter exact name:\n' + team.name + ' or ' + team.playin_partner)
+                          if (winner === team.name || winner === team.playin_partner) resolvePlayin(team.id, winner)
+                          else if (winner) alert('Name must match exactly: ' + team.name + ' or ' + team.playin_partner)
+                        }}
+                        className="text-amber-400/60 hover:text-amber-400 text-xs font-body shrink-0 mr-2"
+                        title="Resolve play-in winner"
+                      >Resolve</button>
+                    )}
                     {team.region && <span className="text-white/30 text-xs font-body">{team.region}</span>}
                     {team.eliminated_round ? (
                       <span className="text-red-400 text-xs font-body">Out R{team.eliminated_round}</span>
