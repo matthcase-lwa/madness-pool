@@ -35,7 +35,7 @@ interface ParticipantPick {
 
 export default function LeaderboardPage() {
   const [scores, setScores] = useState<ParticipantScore[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [picks, setPicks] = useState<Record<string, ParticipantPick[]>>({})
   const [currentRound, setCurrentRound] = useState(0)
@@ -69,6 +69,7 @@ export default function LeaderboardPage() {
   }, [])
 
   useEffect(() => {
+    setLoading(true)
     loadScores()
     // Refresh scores from DB every 60 seconds
     const refreshInterval = setInterval(loadScores, 60000)
@@ -196,7 +197,7 @@ export default function LeaderboardPage() {
         )}
 
         {/* Leaderboard */}
-        {loading ? (
+        {loading && scores.length === 0 ? (
           <div className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="card p-4 h-16 shimmer" style={{ animationDelay: `${i * 100}ms` }} />
