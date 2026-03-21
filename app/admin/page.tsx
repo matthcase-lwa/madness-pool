@@ -5,6 +5,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { ROUND_NAMES } from '@/lib/scoring'
+import { BRACKET_2026 } from '@/lib/bracketData'
 const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), { ssr: false })
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
 
@@ -986,6 +987,20 @@ export default function AdminPage() {
     )
   }
 
+  // Compute missing scores for the current round
+  const currentRoundMatchups = BRACKET_2026.filter(g => g.round === parseInt(gameForm.round) && g.top && g.bottom)
+  const missingMatchups = currentRoundMatchups.filter(matchup => {
+    const topName = matchup.top ? matchup.top.name : ''
+    const bottomName = matchup.bottom ? matchup.bottom.name : ''
+    return !games.some(g => {
+      const winner = teams.find(t => t.id === g.winner_team_id)
+      const loser = teams.find(t => t.id === g.loser_team_id)
+      const names = [winner ? winner.name : '', loser ? loser.name : '']
+      return names.includes(topName) || names.includes(bottomName)
+    })
+  })
+
+
   return (
     <div className="min-h-screen bg-hardwood court-texture">
       <SiteNav />
@@ -1200,6 +1215,26 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+
+            {/* Missing scores checklist */}
+            {missingMatchups.length > 0 && (
+              <div className="card p-5 border-amber-500/20 bg-amber-500/5">
+                <h3 className="font-display text-lg text-amber-400 tracking-wider mb-3">
+                  {'MISSING — ' + ROUND_NAMES[parseInt(gameForm.round)] + ' (' + missingMatchups.length + ' of ' + currentRoundMatchups.length + ' remaining)'}
+                </h3>
+                <div className="grid md:grid-cols-2 gap-2">
+                  {missingMatchups.map(m => (
+                    <div key={m.id} className="flex items-center gap-2 text-sm font-body bg-white/5 px-3 py-2 rounded-lg">
+                      <span className="text-white/30 text-xs w-5 text-center">{'#' + (m.top ? m.top.seed : '')}</span>
+                      <span className="text-chalk font-bold">{m.top ? m.top.name : ''}</span>
+                      <span className="text-white/20 mx-1">vs</span>
+                      <span className="text-white/30 text-xs w-5 text-center">{'#' + (m.bottom ? m.bottom.seed : '')}</span>
+                      <span className="text-white/60">{m.bottom ? m.bottom.name : ''}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="card p-6">
               <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">RECORD GAME RESULT</h2>
