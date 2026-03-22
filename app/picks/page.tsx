@@ -41,6 +41,7 @@ interface TeamStat {
   count: number
   pct: number
   participants: string[]
+  participantIds: string[]
 }
 
 export default function PicksPage() {
@@ -54,6 +55,7 @@ export default function PicksPage() {
   const [isOpen, setIsOpen] = useState(new Date() < DEADLINE)
   const [participantCount, setParticipantCount] = useState<number>(0)
   const [allGames, setAllGames] = useState<any[]>([])
+  const [scores, setScores] = useState<any[]>([])
 
   useEffect(() => {
     setIsOpen(new Date() < DEADLINE)
@@ -117,10 +119,13 @@ export default function PicksPage() {
         const t = pick.team as Team
         const part = parts.find(p => p.id === pick.participant_id)
         if (!teamMap[t.id]) {
-          teamMap[t.id] = { team: t, count: 0, pct: 0, participants: [] }
+          teamMap[t.id] = { team: t, count: 0, pct: 0, participants: [], participantIds: [] }
         }
         teamMap[t.id].count++
-        if (part) teamMap[t.id].participants.push(part.nickname)
+        if (part) {
+          teamMap[t.id].participants.push(part.nickname)
+          teamMap[t.id].participantIds.push(part.id)
+        }
       })
       const total = parts.length || 1
       const stats = Object.values(teamMap).map(s => ({
@@ -135,6 +140,14 @@ export default function PicksPage() {
         .select('round, winner_team_id, margin')
         .eq('year', YEAR)
       if (gamesData) setAllGames(gamesData)
+
+      // Load scores for ranking pickers
+      const { data: scoresData } = await supabase
+        .from('participant_scores')
+        .select('participant_id, nickname, rank, total_points')
+        .eq('year', YEAR)
+        .order('rank')
+      if (scoresData) setScores(scoresData)
 
       setLoading(false)
     }
@@ -248,6 +261,9 @@ export default function PicksPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredParticipants.map(participant => {
                 const picks = allPicks[participant.id] || []
+                const participantTotal = allGames.length > 0
+                  ? picks.reduce((s: number, t: any) => s + teamPoints(t.id, t.seed), 0)
+                  : 0
                 return (
                   <button
                     key={participant.id}
@@ -265,7 +281,7 @@ export default function PicksPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-white/40 text-xs font-body">Remaining: {picks.filter(t => !t.eliminated_round).length}/8</div>
-                        {allGames.length > 0 && (() => { const total = picks.reduce((s, t) => s + teamPoints(t.id, t.seed), 0); return total > 0 ? <div className="text-maize-400 text-xs font-bold">{total} pts</div> : null })()}
+{participantTotal > 0 && <div className="text-maize-400 text-xs font-bold">{participantTotal + ' pts'}</div>}
                       </div>
                     </div>
                     {picks.length > 0 ? (
@@ -317,7 +333,17 @@ export default function PicksPage() {
                       </span>
                     </div>
                     <div className="grid md:grid-cols-2 gap-2 mb-1">
-                      {seedTeams.map(({ team, count, pct, participants: pList }) => (
+                      {seedTeams.map(({ team, count, pct, participants: pList, participantIds }) => {
+                        const teamWins = allGames.filter(g => g.winner_team_id === team.id)
+                        const totalPts = teamPoints(team.id, team.seed)
+                        const sortedPickers = (participantIds || [])
+                          .map((id: string, i: number) => ({ id, nick: pList[i] }))
+                          .sort((a: any, b: any) => {
+                            const ra = scores.find((s: any) => s.participant_id === a.id)?.rank ?? 999
+                            const rb = scores.find((s: any) => s.participant_id === b.id)?.rank ?? 999
+                            return ra - rb
+                          })
+                        return (
                         <div key={team.id} className={'card p-4' + (team.eliminated_round ? ' opacity-40 grayscale' : '')}>
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -329,26 +355,48 @@ export default function PicksPage() {
                               <span className="text-white/30 text-xs font-body ml-1">({count})</span>
                             </div>
                           </div>
+                          {/* Points by round */}
+                          {teamWins.length > 0 && (
+                            <div className="flex items-center justify-between mt-1 mb-2">
+                              <div className="flex gap-1 flex-wrap">
+                                {teamWins.map(g => {
+                                  const base = g.round >= 1 && g.round <= 6 ? g.round : 0
+                                  const underdog = team.seed >= 9 ? 3 : 0
+                                  const margin = Math.floor((g.margin || 0) / 10)
+                                  const roundLabel = ['','R64','R32','S16','E8','F4','Champ'][g.round] || ''
+                                  return (
+                                    <span key={g.round} className="text-xs font-body bg-white/10 px-1.5 py-0.5 rounded text-white/60">
+                                      {roundLabel + ': ' + (base + underdog + margin) + 'pt'}
+                                    </span>
+                                  )
+                                })}
+                              </div>
+                              <span className="text-maize-400 text-xs font-bold">{totalPts + ' total'}</span>
+                            </div>
+                          )}
                           {/* Progress bar */}
                           <div className="w-full bg-white/10 rounded-full h-1.5 mb-2">
                             <div
                               className={'h-1.5 rounded-full transition-all duration-500 ' + (team.eliminated_round ? 'bg-white/20' : 'bg-maize-500')}
-                              style={{ width: `${pct}%` }}
+                              style={{ width: pct + '%' }}
                             />
                           </div>
-                          {/* Who picked them */}
+                          {/* Who picked them - sorted by rank */}
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {pList.slice(0, 8).map(nick => (
-                              <span key={nick} className="text-white/40 text-xs font-body bg-white/5 px-1.5 py-0.5 rounded">
-                                {nick}
-                              </span>
-                            ))}
-                            {pList.length > 8 && (
-                              <span className="text-white/30 text-xs font-body">+{pList.length - 8} more</span>
+                            {sortedPickers.slice(0, 8).map((p: any) => {
+                              const sc = scores.find((s: any) => s.participant_id === p.id)
+                              return (
+                                <span key={p.id} className="text-white/40 text-xs font-body bg-white/5 px-1.5 py-0.5 rounded">
+                                  {p.nick + (sc ? ' #' + sc.rank : '')}
+                                </span>
+                              )
+                            })}
+                            {sortedPickers.length > 8 && (
+                              <span className="text-white/30 text-xs font-body">{'+' + (sortedPickers.length - 8) + ' more'}</span>
                             )}
                           </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 )

@@ -859,23 +859,36 @@ export default function AdminPage() {
 
   async function addGame() {
     if (!gameForm.winner_id || !gameForm.loser_id || !gameForm.winner_score || !gameForm.loser_score) return
+    const round = parseInt(gameForm.round)
+    // Duplicate check: has either team already played in this round?
+    const alreadyRecorded = games.some(g => g.round === round && (
+      g.winner_team_id === gameForm.winner_id ||
+      g.winner_team_id === gameForm.loser_id ||
+      g.loser_team_id === gameForm.winner_id ||
+      g.loser_team_id === gameForm.loser_id
+    ))
+    if (alreadyRecorded) {
+      const winnerName = teams.find(t => t.id === gameForm.winner_id)?.name || ''
+      const loserName = teams.find(t => t.id === gameForm.loser_id)?.name || ''
+      setMsg('⚠️ A game for ' + winnerName + ' or ' + loserName + ' in this round is already recorded. Delete it first if you need to correct it.')
+      return
+    }
     const { error } = await supabase.from('games').insert({
       year: YEAR,
-      round: parseInt(gameForm.round),
+      round,
       winner_team_id: gameForm.winner_id,
       loser_team_id: gameForm.loser_id,
       winner_score: parseInt(gameForm.winner_score),
       loser_score: parseInt(gameForm.loser_score),
     })
-    // Also mark loser as eliminated
     if (!error) {
-      await supabase.from('teams').update({ eliminated_round: parseInt(gameForm.round) }).eq('id', gameForm.loser_id)
+      await supabase.from('teams').update({ eliminated_round: round }).eq('id', gameForm.loser_id)
       setGameForm({ round: '1', winner_id: '', loser_id: '', winner_score: '', loser_score: '' })
       setWinnerText('')
       setLoserText('')
       setMsg('✓ Game result saved!')
       loadData()
-    } else setMsg(`Error: ${error.message}`)
+    } else setMsg('Error: ' + error.message)
   }
 
   async function deleteParticipant(participantId: string, nickname: string) {
@@ -1217,24 +1230,81 @@ export default function AdminPage() {
             </div>
 
             {/* Missing scores checklist */}
-            {missingMatchups.length > 0 && (
-              <div className="card p-5 border-amber-500/20 bg-amber-500/5">
-                <h3 className="font-display text-lg text-amber-400 tracking-wider mb-3">
-                  {'MISSING — ' + ROUND_NAMES[parseInt(gameForm.round)] + ' (' + missingMatchups.length + ' of ' + currentRoundMatchups.length + ' remaining)'}
+            {/* Round progress panel - always visible */}
+            <div className={'card p-5 ' + (missingMatchups.length === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/20 bg-amber-500/5')}>
+              {/* Header with progress bar */}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className={'font-display text-lg tracking-wider ' + (missingMatchups.length === 0 ? 'text-emerald-400' : 'text-amber-400')}>
+                  {missingMatchups.length === 0
+                    ? '✓ ' + ROUND_NAMES[parseInt(gameForm.round)] + ' COMPLETE'
+                    : ROUND_NAMES[parseInt(gameForm.round)] + ' PROGRESS'}
                 </h3>
-                <div className="grid md:grid-cols-2 gap-2">
-                  {missingMatchups.map(m => (
-                    <div key={m.id} className="flex items-center gap-2 text-sm font-body bg-white/5 px-3 py-2 rounded-lg">
-                      <span className="text-white/30 text-xs w-5 text-center">{'#' + (m.top ? m.top.seed : '')}</span>
-                      <span className="text-chalk font-bold">{m.top ? m.top.name : ''}</span>
-                      <span className="text-white/20 mx-1">vs</span>
-                      <span className="text-white/30 text-xs w-5 text-center">{'#' + (m.bottom ? m.bottom.seed : '')}</span>
-                      <span className="text-white/60">{m.bottom ? m.bottom.name : ''}</span>
-                    </div>
-                  ))}
-                </div>
+                <span className={'text-sm font-body font-bold ' + (missingMatchups.length === 0 ? 'text-emerald-400' : 'text-amber-400')}>
+                  {(currentRoundMatchups.length - missingMatchups.length) + ' / ' + currentRoundMatchups.length + ' entered'}
+                </span>
               </div>
-            )}
+              <div className="w-full bg-white/10 rounded-full h-2 mb-4">
+                <div
+                  className={'h-2 rounded-full transition-all duration-500 ' + (missingMatchups.length === 0 ? 'bg-emerald-500' : 'bg-amber-500')}
+                  style={{ width: (currentRoundMatchups.length > 0 ? Math.round(((currentRoundMatchups.length - missingMatchups.length) / currentRoundMatchups.length) * 100) : 0) + '%' }}
+                />
+              </div>
+
+              {/* Missing games - clickable to auto-fill form */}
+              {missingMatchups.length > 0 && (
+                <div>
+                  <div className="text-white/30 text-xs font-body uppercase tracking-wider mb-2">Click a matchup to pre-fill the form below</div>
+                  <div className="grid md:grid-cols-2 gap-2">
+                    {missingMatchups.map(m => {
+                      const topTeam = m.top ? teams.find(t => t.name === m.top!.name) : null
+                      const botTeam = m.bottom ? teams.find(t => t.name === m.bottom!.name) : null
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            if (topTeam && botTeam) {
+                              setWinnerText('#' + topTeam.seed + ' ' + topTeam.name)
+                              setLoserText('#' + botTeam.seed + ' ' + botTeam.name)
+                              setGameForm(f => ({ ...f, winner_id: '', loser_id: '' }))
+                            }
+                          }}
+                          className="flex items-center gap-2 text-sm font-body bg-white/5 hover:bg-white/10 px-3 py-2 rounded-lg text-left transition-colors border border-white/5 hover:border-amber-500/30 w-full"
+                        >
+                          <span className="text-white/30 text-xs w-5 text-center shrink-0">{'#' + (m.top ? m.top.seed : '')}</span>
+                          <span className="text-chalk font-bold flex-1">{m.top ? m.top.name : ''}</span>
+                          <span className="text-white/20 text-xs">vs</span>
+                          <span className="text-white/60 flex-1 text-right">{m.bottom ? m.bottom.name : ''}</span>
+                          <span className="text-white/30 text-xs w-5 text-center shrink-0">{'#' + (m.bottom ? m.bottom.seed : '')}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Completed games for this round */}
+              {currentRoundMatchups.length > missingMatchups.length && (
+                <div className="mt-3 pt-3 border-t border-white/10">
+                  <div className="text-white/20 text-xs font-body uppercase tracking-wider mb-2">Entered</div>
+                  <div className="flex flex-wrap gap-1">
+                    {currentRoundMatchups.filter(m => !missingMatchups.includes(m)).map(m => {
+                      const game = games.find(g => {
+                        const w = teams.find(t => t.id === g.winner_team_id)
+                        const l = teams.find(t => t.id === g.loser_team_id)
+                        return (w?.name === m.top?.name || w?.name === m.bottom?.name || l?.name === m.top?.name || l?.name === m.bottom?.name)
+                      })
+                      const winner = game ? teams.find(t => t.id === game.winner_team_id) : null
+                      const loser = game ? teams.find(t => t.id === game.loser_team_id) : null
+                      return (
+                        <span key={m.id} className="text-emerald-400/60 text-xs font-body bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">
+                          {winner ? ('✓ ' + winner.name + ' ' + (game ? game.winner_score + '-' + game.loser_score : '')) : (m.top ? m.top.name : '')}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="card p-6">
               <h2 className="font-display text-2xl text-maize-400 tracking-wider mb-4">RECORD GAME RESULT</h2>
