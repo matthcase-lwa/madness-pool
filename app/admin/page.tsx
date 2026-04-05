@@ -1329,9 +1329,13 @@ export default function AdminPage() {
                       if (match) {
                         const opponentId = getOpponent(match.id, parseInt(gameForm.round))
                         const opponent = teams.find(t => t.id === opponentId)
-                        setGameForm(f => ({ ...f, winner_id: match.id, loser_id: opponentId }))
-                        if (opponent) setLoserText('#' + opponent.seed + ' ' + opponent.name)
-                        else setLoserText('')
+                        if (opponentId && opponent) {
+                          setGameForm(f => ({ ...f, winner_id: match.id, loser_id: opponentId }))
+                          setLoserText('#' + opponent.seed + ' ' + opponent.name)
+                        } else {
+                          // Rounds 5-6: just set winner, leave loser as-is
+                          setGameForm(f => ({ ...f, winner_id: match.id }))
+                        }
                       } else {
                         setGameForm(f => ({ ...f, winner_id: '' }))
                       }
@@ -1357,9 +1361,13 @@ export default function AdminPage() {
                       if (match) {
                         const opponentId = getOpponent(match.id, parseInt(gameForm.round))
                         const opponent = teams.find(t => t.id === opponentId)
-                        setGameForm(f => ({ ...f, loser_id: match.id, winner_id: opponentId }))
-                        if (opponent) setWinnerText('#' + opponent.seed + ' ' + opponent.name)
-                        else setWinnerText('')
+                        if (opponentId && opponent) {
+                          setGameForm(f => ({ ...f, loser_id: match.id, winner_id: opponentId }))
+                          setWinnerText('#' + opponent.seed + ' ' + opponent.name)
+                        } else {
+                          // Rounds 5-6: just set loser, leave winner as-is
+                          setGameForm(f => ({ ...f, loser_id: match.id }))
+                        }
                       } else {
                         setGameForm(f => ({ ...f, loser_id: '' }))
                       }
