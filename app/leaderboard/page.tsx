@@ -9,6 +9,9 @@ const ParticipantCount = dynamic(() => import('@/components/ParticipantCount'), 
 const NavCTA = dynamic(() => import('@/components/NavCTA'), { ssr: false })
 const TeamBadge = dynamic(() => import('@/components/TeamBadge'), { ssr: false })
 const SiteNav = dynamic(() => import('@/components/SiteNav'), { ssr: false })
+const LiveScoreboard = dynamic(() => import('@/components/LiveScoreboard'), { ssr: false })
+const TrashTalk = dynamic(() => import('@/components/TrashTalk'), { ssr: false })
+const TitleOdds = dynamic(() => import('@/components/TitleOdds'), { ssr: false })
 
 const YEAR = parseInt(process.env.NEXT_PUBLIC_POOL_YEAR || '2026')
 const DEADLINE = new Date(process.env.NEXT_PUBLIC_ENTRY_DEADLINE || '2026-03-19T16:15:00Z')
@@ -254,6 +257,10 @@ export default function LeaderboardPage() {
             </button>
           </div>
         </div>
+
+        <LiveScoreboard onGameFinalized={loadScores} />
+        <TrashTalk />
+        <TitleOdds />
 
         {scores.length > 0 && (
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8">

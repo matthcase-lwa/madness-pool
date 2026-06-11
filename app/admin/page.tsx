@@ -715,18 +715,20 @@ export default function AdminPage() {
     loadData()
   }, [authed])
 
-  async function syncNow() {
+  async function syncNow(source?: string) {
     setSyncing(true)
     setSyncResult(null)
+    const endpoint = source === 'espn' ? '/api/sync-scores' : '/api/ncaa-sync'
+    const sourceLabel = source === 'espn' ? 'ESPN' : 'NCAA.com'
     try {
-      const res = await fetch('/api/sync-scores', {
+      const res = await fetch(endpoint, {
         headers: { 'Authorization': 'Bearer ' + password }
       })
       const data = await res.json()
       setSyncResult(data)
       if (data.inserted > 0) {
         loadData()
-        setMsg('Synced ' + data.inserted + ' new game' + (data.inserted !== 1 ? 's' : '') + ' from ESPN')
+        setMsg('Synced ' + data.inserted + ' new game' + (data.inserted !== 1 ? 's' : '') + ' from ' + sourceLabel)
       } else {
         setMsg('Sync complete — no new games found')
       }
@@ -1202,15 +1204,25 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="font-display text-xl text-maize-400 tracking-wider">AUTO SYNC</h3>
-                  <p className="text-white/30 text-xs font-body mt-1">Pulls completed games from ESPN every 5 minutes automatically. Use Sync Now to force an immediate update.</p>
+                  <p className="text-white/30 text-xs font-body mt-1">Pulls completed games from NCAA.com automatically whenever the leaderboard live scoreboard sees a final. Use Sync Now to force an immediate update, or ESPN as a backup source.</p>
                 </div>
-                <button
-                  onClick={syncNow}
-                  disabled={syncing}
-                  className="btn-primary shrink-0 ml-4"
-                >
-                  {syncing ? 'Syncing...' : '⚡ Sync Now'}
-                </button>
+                <div className="flex items-center gap-2 shrink-0 ml-4">
+                  <button
+                    onClick={() => syncNow()}
+                    disabled={syncing}
+                    className="btn-primary"
+                  >
+                    {syncing ? 'Syncing...' : '⚡ Sync Now'}
+                  </button>
+                  <button
+                    onClick={() => syncNow('espn')}
+                    disabled={syncing}
+                    className="btn-secondary text-xs"
+                    title="Backup source if NCAA.com is down"
+                  >
+                    ESPN backup
+                  </button>
+                </div>
               </div>
               {syncResult && (
                 <div className="mt-3 text-xs font-body space-y-1">
@@ -1222,7 +1234,12 @@ export default function AdminPage() {
                   ))}
                   {syncResult.unmatched?.length > 0 && (
                     <div className="text-amber-400/70 mt-2">
-                      Unmatched teams (add manually): {syncResult.unmatched.join(', ')}
+                      Unmatched teams (enter these games manually): {syncResult.unmatched.join(', ')}
+                    </div>
+                  )}
+                  {syncResult.learnedSlugs?.length > 0 && (
+                    <div className="text-sky-400/60 mt-1">
+                      Learned NCAA team IDs: {syncResult.learnedSlugs.join(', ')}
                     </div>
                   )}
                 </div>
